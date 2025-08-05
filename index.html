@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 HACKER VOCABULARY QUIZ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d4f3c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #00ff00;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Efecto Matrix de fondo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 60% 40%, rgba(0, 150, 0, 0.05) 0%, transparent 50%);
+            animation: matrix 20s infinite linear;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes matrix {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.3),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            animation: scanlines 2s infinite linear, glow 3s ease-in-out infinite alternate;
+            position: relative;
+        }
+
+        @keyframes scanlines {
+            0% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.1); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 0, 0.5), inset 0 0 30px rgba(0, 255, 0, 0.2); }
+            100% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.1); }
+        }
+
+        @keyframes glow {
+            from { border-color: #00ff00; }
+            to { border-color: #00ffff; }
+        }
+
+        h1 {
+            color: #00ffff;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            letter-spacing: 2px;
+            animation: typing 0.5s ease-out, flicker 2s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background: linear-gradient(135deg, #001100 0%, #003300 100%);
+            color: #00ff00;
+            padding: 15px;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+
+        .score-item {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .word-display {
+            background: linear-gradient(135deg, #001a1a 0%, #004d4d 100%);
+            color: #00ffff;
+            padding: 25px;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.4),
+                inset 0 0 10px rgba(0, 255, 255, 0.1);
+            animation: wordGlow 3s ease-in-out infinite alternate;
+            letter-spacing: 1px;
+        }
+
+        @keyframes wordGlow {
+            from { 
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.1);
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 15px rgba(0, 255, 255, 0.2);
+                transform: scale(1.02);
+            }
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            color: #00ff00;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            background: linear-gradient(135deg, #001100 0%, #002200 100%);
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #00ff00;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .option-btn:hover::before {
+            left: 100%;
+        }
+
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 0, 0.4);
+            border-color: #00ffff;
+            color: #00ffff;
+        }
+
+        .option-btn.selected {
+            background: linear-gradient(135deg, #003300 0%, #006600 100%);
+            border-color: #00ffff;
+            color: #00ffff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(135deg, #004400 0%, #008800 100%);
+            border-color: #00ff00;
+            color: #ffffff;
+            animation: correctPulse 0.8s ease-out;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
+        }
+
+        .option-btn.incorrect {
+            background: linear-gradient(135deg, #440000 0%, #880000 100%);
+            border-color: #ff0000;
+            color: #ffcccc;
+            animation: errorShake 0.6s ease-out;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 2px solid;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #001a1a 0%, #003d3d 100%);
+            color: #00ffff;
+            border-color: #00ffff;
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(135deg, #003d3d 0%, #007a7a 100%);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .progress {
+            background: #222;
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            height: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #00ff00, #00ffff);
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            animation: progressGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes progressGlow {
+            from { box-shadow: 0 0 10px rgba(0, 255, 0, 0.8); }
+            to { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .result-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+            border: 2px solid;
+        }
+
+        .result-message.correct {
+            background: linear-gradient(135deg, #001100 0%, #003300 100%);
+            color: #00ff00;
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .result-message.incorrect {
+            background: linear-gradient(135deg, #330000 0%, #660000 100%);
+            color: #ffcccc;
+            border-color: #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .final-score {
+            background: linear-gradient(135deg, #000f0f 0%, #001f1f 100%);
+            color: #00ffff;
+            padding: 30px;
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            animation: finalGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes finalGlow {
+            from { box-shadow: 0 0 30px rgba(0, 255, 255, 0.6); }
+            to { box-shadow: 0 0 50px rgba(0, 255, 0, 0.8); }
+        }
+
+        .final-score h2 {
+            margin-bottom: 15px;
+            font-size: 2rem;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .final-score p {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #00ffff;
+        }
+
+        /* Terminal-style typing effect */
+        .typing::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .word-display {
+                font-size: 1.4rem;
+                padding: 20px;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Efecto de escaneo */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            animation: scan 3s infinite linear;
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="scan-line"></div>
+        <h1 class="typing">💀 HACKER VOCABULARY QUIZ</h1>
+        
+        <div class="score-board">
+            <div class="score-item">🎯 QUESTION: <span id="current-question">1</span>/<span id="total-questions">167</span></div>
+            <div class="score-item">✅ CORRECT: <span id="correct-score">0</span></div>
+            <div class="score-item">❌ FAILED: <span id="incorrect-score">0</span></div>
+        </div>
+
+        <div class="progress-text">
+            <span id="progress-text">>>> HACKING PROGRESS...</span>
+        </div>
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="result-message" id="result-message"></div>
+
+        <div class="word-display" id="word-display">
+            LOADING MATRIX...
+        </div>
+
+        <div class="question-text" id="question-text">
+            > DECODE THE MEANING OF THIS WORD_
+        </div>
+
+        <div class="options-container" id="options-container">
+            <!-- Las opciones se generan dinámicamente -->
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn restart-btn" onclick="restartQuiz()">
+                🔄 RESET_MATRIX
+            </button>
+        </div>
+
+        <div class="final-score" id="final-score">
+            <h2>🔥 MISSION COMPLETE!</h2>
+            <p>SUCCESSFUL HACKS: <span id="final-correct">0</span></p>
+            <p>FAILED ATTEMPTS: <span id="final-incorrect">0</span></p>
+            <p>SUCCESS RATE: <span id="final-percentage">0</span>%</p>
+            <p id="final-message"></p>
+        </div>
+    </div>
+
+    <script>
+        // 🔥 VOCABULARIO COMPLETO - TODAS LAS 167 PALABRAS
+        const vocabulario = [
+            {"word": "psychiatrist", "meaning": "psiquiatra"},
+            {"word": "psychologist", "meaning": "psicólogo"},
+            {"word": "insights", "meaning": "ideas profundas / revelaciones"},
+            {"word": "attachment", "meaning": "apego"},
+            {"word": "illuminate", "meaning": "iluminar / aclarar"},
+            {"word": "drawing from", "meaning": "tomando de / inspirándose en"},
+            {"word": "early", "meaning": "temprano"},
+            {"word": "caregivers", "meaning": "cuidadores"},
+            {"word": "shape", "meaning": "formar / moldear"},
+            {"word": "patterns", "meaning": "patrones"},
+            {"word": "avoidant", "meaning": "evasivo / que evita"},
+            {"word": "healthier", "meaning": "más saludable"},
+            {"word": "as well as", "meaning": "así como / además de"},
+            {"word": "esteemed", "meaning": "estimado / respetado"},
+            {"word": "relationship behavior", "meaning": "comportamiento en las relaciones"},
+            {"word": "leading", "meaning": "que lleva a / conduciendo"},
+            {"word": "isolation", "meaning": "aislamiento"},
+            {"word": "inadequacy", "meaning": "insuficiencia / sensación de no ser suficiente"},
+            {"word": "attractiveness", "meaning": "atractivo / nivel de atracción"},
+            {"word": "commitment", "meaning": "compromiso"},
+            {"word": "worries", "meaning": "preocupaciones"},
+            {"word": "reflecting", "meaning": "reflexionando / reflejando"},
+            {"word": "intimacy", "meaning": "intimidad"},
+            {"word": "closeness", "meaning": "cercanía emocional"},
+            {"word": "turmoil", "meaning": "confusión / agitación"},
+            {"word": "highlighting", "meaning": "destacando / resaltando"},
+            {"word": "despite", "meaning": "a pesar de"},
+            {"word": "rooted", "meaning": "arraigado"},
+            {"word": "stressful", "meaning": "estresante"},
+            {"word": "such as", "meaning": "como por ejemplo"},
+            {"word": "behaviors", "meaning": "comportamientos"},
+            {"word": "enhancing", "meaning": "mejorando / potenciando"},
+            {"word": "foster", "meaning": "fomentar / cultivar"},
+            {"word": "encouraged", "meaning": "animado / impulsado"},
+            {"word": "enhance", "meaning": "mejorar / realzar"},
+            {"word": "further", "meaning": "más allá / adicionalmente"},
+            {"word": "struggle", "meaning": "lucha / dificultad"},
+            {"word": "deep", "meaning": "profundo"},
+            {"word": "loneliness", "meaning": "soledad"},
+            {"word": "lack", "meaning": "falta"},
+            {"word": "fulfillment", "meaning": "realización / plenitud"},
+            {"word": "concerns", "meaning": "preocupaciones / inquietudes"},
+            {"word": "isolation—even in long-term", "meaning": "aislamiento, incluso en relaciones largas"},
+            {"word": "straightforward", "meaning": "directo / sencillo"},
+            {"word": "led", "meaning": "llevó / condujo"},
+            {"word": "within", "meaning": "dentro de"},
+            {"word": "affectionate", "meaning": "cariñoso"},
+            {"word": "craves", "meaning": "anhela"},
+            {"word": "preoccupied", "meaning": "preocupado / absorbido"},
+            {"word": "partner's affection", "meaning": "afecto de la pareja"},
+            {"word": "values independence", "meaning": "valora la independencia"},
+            {"word": "themselves", "meaning": "ellos mismos"},
+            {"word": "misunderstandings", "meaning": "malentendidos"},
+            {"word": "behavior", "meaning": "comportamiento"},
+            {"word": "clashed", "meaning": "chocaron / entraron en conflicto"},
+            {"word": "avoidant tendencies", "meaning": "tendencias evasivas"},
+            {"word": "strain", "meaning": "tensión"},
+            {"word": "are rooted", "meaning": "están arraigadas"},
+            {"word": "close relationships", "meaning": "relaciones cercanas"},
+            {"word": "advocate", "meaning": "defensor / proponer"},
+            {"word": "lens", "meaning": "lente / perspectiva"},
+            {"word": "well-being", "meaning": "bienestar"},
+            {"word": "encourage", "meaning": "animar / fomentar"},
+            {"word": "delve", "meaning": "profundizar"},
+            {"word": "deeper", "meaning": "más profundo"},
+            {"word": "toward", "meaning": "hacia"},
+            {"word": "partnerships", "meaning": "asociaciones / relaciones de pareja"},
+            {"word": "appeared", "meaning": "apareció / parecía"},
+            {"word": "couple", "meaning": "pareja"},
+            {"word": "arose", "meaning": "surgió"},
+            {"word": "amidst", "meaning": "en medio de"},
+            {"word": "desired", "meaning": "deseado"},
+            {"word": "differing needs", "meaning": "necesidades diferentes"},
+            {"word": "sought", "meaning": "buscó"},
+            {"word": "reassurance", "meaning": "tranquilidad / reafirmación"},
+            {"word": "misinterpreting", "meaning": "malinterpretando"},
+            {"word": "needy", "meaning": "necesitado / dependiente emocional"},
+            {"word": "neediness", "meaning": "necesidad excesiva"},
+            {"word": "desire", "meaning": "deseo"},
+            {"word": "flaw", "meaning": "defecto"},
+            {"word": "understood", "meaning": "entendido"},
+            {"word": "downplay", "meaning": "minimizar"},
+            {"word": "emotional closeness", "meaning": "cercanía emocional"},
+            {"word": "independence over intimacy", "meaning": "independencia por encima de la intimidad"},
+            {"word": "child-rearing", "meaning": "crianza de los hijos"},
+            {"word": "discouraged", "meaning": "desanimado / inhibido"},
+            {"word": "labeling", "meaning": "etiquetar"},
+            {"word": "weakness", "meaning": "debilidad"},
+            {"word": "reshaped", "meaning": "transformado / reformado"},
+            {"word": "bonds", "meaning": "vínculos"},
+            {"word": "self-help narratives", "meaning": "discursos de autoayuda"},
+            {"word": "conflate", "meaning": "confundir / mezclar"},
+            {"word": "dysfunction", "meaning": "disfunción"},
+            {"word": "promoting", "meaning": "promoviendo"},
+            {"word": "self-sufficiency", "meaning": "autosuficiencia"},
+            {"word": "harmful", "meaning": "dañino"},
+            {"word": "overlooking", "meaning": "ignorando / dejando pasar"},
+            {"word": "realities", "meaning": "realidades"},
+            {"word": "sustainability", "meaning": "sostenibilidad"},
+            {"word": "reinforce", "meaning": "reforzar"},
+            {"word": "innate", "meaning": "innato"},
+            {"word": "navigating", "meaning": "navegando / manejando"},
+            {"word": "interconnectedness", "meaning": "interconexión"},
+            {"word": "grown-ups", "meaning": "adultos"},
+            {"word": "thrive", "meaning": "prosperar / florecer"},
+            {"word": "supportive", "meaning": "de apoyo / que brinda soporte"},
+            {"word": "unmet", "meaning": "no satisfecho / no correspondido"},
+            {"word": "distress", "meaning": "angustia"},
+            {"word": "bolster", "meaning": "reforzar / apoyar"},
+            {"word": "unsatisfying ones", "meaning": "relaciones insatisfactorias"},
+            {"word": "chronic", "meaning": "crónico"},
+            {"word": "risks", "meaning": "riesgos"},
+            {"word": "fulfills", "meaning": "satisface / cumple"},
+            {"word": "promotes", "meaning": "promueve"},
+            {"word": "awareness", "meaning": "conciencia"},
+            {"word": "empowering", "meaning": "empoderador / fortalecedor"},
+            
+            // PALABRAS EN ESPAÑOL CON TRADUCCIÓN AL INGLÉS
+            {"word": "paradigms", "meaning": "paradigmas"},
+            {"word": "to allow", "meaning": "permitir"},
+            {"word": "to take out", "meaning": "sacar"},
+            {"word": "to set out to", "meaning": "proponerse"},
+            {"word": "to solve", "meaning": "resolver"},
+            {"word": "diploma", "meaning": "diploma"},
+            {"word": "author", "meaning": "autor"},
+            {"word": "over there", "meaning": "allá"},
+            {"word": "pending", "meaning": "pendiente"},
+            {"word": "to take", "meaning": "tomar"},
+            {"word": "characteristics", "meaning": "características"},
+            {"word": "bakery", "meaning": "panadería"},
+            {"word": "pastry shop", "meaning": "pastelería"},
+            {"word": "to imagine", "meaning": "imaginar"},
+            {"word": "you must", "meaning": "debes"},
+            {"word": "mold", "meaning": "molde"},
+            {"word": "let me", "meaning": "déjame"},
+            {"word": "to save", "meaning": "ahorrar"},
+            {"word": "to instantiate", "meaning": "instanciar"},
+            {"word": "to define", "meaning": "definir"},
+            {"word": "advantage", "meaning": "ventaja"},
+            {"word": "prototypes", "meaning": "prototipos"},
+            {"word": "during", "meaning": "durante"},
+            {"word": "abstraction", "meaning": "abstracción"},
+            {"word": "let's move on", "meaning": "pasemos"},
+            {"word": "inheritance", "meaning": "herencia"},
+            {"word": "referee", "meaning": "árbitro"},
+            {"word": "goalkeeper", "meaning": "portero"},
+            {"word": "to hide", "meaning": "esconder"},
+            {"word": "depth", "meaning": "profundidad"},
+            {"word": "to internalize", "meaning": "interiorizar"},
+            {"word": "to indicate", "meaning": "indicar"},
+            {"word": "associative", "meaning": "asociativo"},
+            {"word": "key", "meaning": "clave"},
+            {"word": "separated", "meaning": "separados"},
+            {"word": "I finish", "meaning": "acabo"},
+            {"word": "besides", "meaning": "además"},
+            {"word": "to grab", "meaning": "agarrar"},
+            {"word": "interesting", "meaning": "interesante"},
+            {"word": "reserved", "meaning": "reservada"},
+            {"word": "to analyze", "meaning": "analizar"},
+            {"word": "to notice", "meaning": "fijarse"},
+            {"word": "to appear", "meaning": "aparecer"},
+            {"word": "to affect", "meaning": "afectar"},
+            {"word": "parenthesis", "meaning": "paréntesis"},
+            {"word": "even", "meaning": "incluso"},
+            {"word": "to receive", "meaning": "recibir"},
+            {"word": "to have", "meaning": "tener"},
+            {"word": "any", "meaning": "cualquier"},
+            {"word": "passing", "meaning": "pasando"},
+            {"word": "we have", "meaning": "hemos"},
+            {"word": "only", "meaning": "solamente"},
+            {"word": "to say", "meaning": "decir"},
+            {"word": "confusion", "meaning": "confusión"},
+            {"word": "several", "meaning": "varias"},
+            {"word": "review", "meaning": "repasa"}
+        ];
+
+        // Variables del juego
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let selectedOption = null;
+        let quizQuestions = [];
+        let hasAnswered = false;
+
+        // 🚀 GENERAR TODAS LAS PREGUNTAS (167 PALABRAS)
+        function generateQuizQuestions() {
+            const shuffledVocab = [...vocabulario].sort(() => Math.random() - 0.5);
+            quizQuestions = shuffledVocab.map(item => {
+                return generateQuestionOptions(item);
+            });
+        }
+
+        // Generar opciones para una pregunta
+        function generateQuestionOptions(correctItem) {
+            const options = [correctItem.meaning];
+            
+            // Obtener 3 opciones incorrectas aleatorias
+            const otherWords = vocabulario.filter(w => w.word !== correctItem.word);
+            const shuffledOthers = otherWords.sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < 3 && i < shuffledOthers.length; i++) {
+                options.push(shuffledOthers[i].meaning);
+            }
+            
+            // Mezclar las opciones
+            const shuffledOptions = options.sort(() => Math.random() - 0.5);
+            
+            return {
+                word: correctItem.word,
+                correctAnswer: correctItem.meaning,
+                options: shuffledOptions
+            };
+        }
+
+        // Inicializar quiz
+        function initQuiz() {
+            console.log('🔥 INITIALIZING HACKER VOCABULARY MATRIX...');
+            console.log(`💀 TOTAL WORDS TO HACK: ${vocabulario.length}`);
+            generateQuizQuestions(); // Genera TODAS las palabras
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            updateScoreBoard();
+            loadCurrentQuestion();
+            document.getElementById('final-score').style.display = 'none';
+        }
+
+        // Cargar pregunta actual
+        function loadCurrentQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) {
+                showFinalScore();
+                return;
+            }
+
+            const question = quizQuestions[currentQuestionIndex];
+            hasAnswered = false;
+            selectedOption = null;
+            
+            // Actualizar UI con efecto de typing
+            const wordDisplay = document.getElementById('word-display');
+            wordDisplay.textContent = '';
+            typeText(wordDisplay, question.word.toUpperCase(), 50);
+            
+            document.getElementById('result-message').style.display = 'none';
+            
+            // Limpiar opciones anteriores
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            // Crear botones de opciones con delay
+            question.options.forEach((option, index) => {
+                setTimeout(() => {
+                    const button = document.createElement('button');
+                    button.className = 'option-btn';
+                    button.textContent = option.toUpperCase();
+                    button.onclick = () => selectOption(button, option, question.correctAnswer);
+                    optionsContainer.appendChild(button);
+                }, index * 200);
+            });
+            
+            updateProgress();
+            
+            console.log(`💀 HACKING: "${question.word}" → TARGET: "${question.correctAnswer}"`);
+        }
+
+        // Efecto de typing para texto
+        function typeText(element, text, speed = 100) {
+            let i = 0;
+            const timer = setInterval(() => {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(timer);
+                }
+            }, speed);
+        }
+
+        // Seleccionar opción con AUTO-AVANCE
+        function selectOption(button, selectedAnswer, correctAnswer) {
+            if (hasAnswered) return;
+            
+            hasAnswered = true;
+            selectedOption = selectedAnswer;
+            
+            // Marcar todas las opciones
+            const allOptions = document.querySelectorAll('.option-btn');
+            allOptions.forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                if (btn.textContent.toLowerCase() === correctAnswer.toLowerCase()) {
+                    btn.classList.add('correct');
+                } else if (btn === button && selectedAnswer.toLowerCase() !== correctAnswer.toLowerCase()) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            // Actualizar puntuación
+            const isCorrect = selectedAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            if (isCorrect) {
+                correctAnswers++;
+                showResultMessage('>>> ACCESS GRANTED! HACK SUCCESSFUL! 🔥', 'correct');
+            } else {
+                incorrectAnswers++;
+                showResultMessage(`>>> ACCESS DENIED! TARGET WAS: ${correctAnswer.toUpperCase()}`, 'incorrect');
+            }
+            
+            updateScoreBoard();
+            
+            console.log(`${isCorrect ? '✅ HACK SUCCESS' : '❌ HACK FAILED'}: "${selectedAnswer}" (TARGET: "${correctAnswer}")`);
+            
+            // 🚀 AUTO-AVANZAR después de 2.5 segundos
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadCurrentQuestion();
+            }, 2500);
+        }
+
+        // Mostrar mensaje de resultado
+        function showResultMessage(message, type) {
+            const resultMsg = document.getElementById('result-message');
+            resultMsg.textContent = '';
+            resultMsg.className = `result-message ${type}`;
+            resultMsg.style.display = 'block';
+            typeText(resultMsg, message, 30);
+        }
+
+        // Función nextQuestion ya no es necesaria pero la mantenemos por compatibilidad
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadCurrentQuestion();
+        }
+
+        // Actualizar marcador
+        function updateScoreBoard() {
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('total-questions').textContent = quizQuestions.length;
+            document.getElementById('correct-score').textContent = correctAnswers;
+            document.getElementById('incorrect-score').textContent = incorrectAnswers;
+        }
+
+        // Actualizar progreso
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = 
+                `>>> INFILTRATING SYSTEM... ${Math.round(progress)}% COMPLETE`;
+        }
+
+        // Mostrar puntuación final
+        function showFinalScore() {
+            const totalQuestions = quizQuestions.length;
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            
+            document.getElementById('final-correct').textContent = correctAnswers;
+            document.getElementById('final-incorrect').textContent = incorrectAnswers;
+            document.getElementById('final-percentage').textContent = percentage;
+            
+            // Mensaje según el rendimiento
+            let message = '';
+            if (percentage >= 90) {
+                message = '🔥 ELITE HACKER STATUS! MATRIX DOMINATED!';
+            } else if (percentage >= 70) {
+                message = '💀 SKILLED HACKER! SYSTEM COMPROMISED!';
+            } else if (percentage >= 50) {
+                message = '⚡ AMATEUR HACKER. KEEP TRAINING!';
+            } else {
+                message = '💣 ACCESS DENIED. ENHANCE YOUR SKILLS!';
+            }
+            
+            document.getElementById('final-message').textContent = message;
+            document.getElementById('final-score').style.display = 'block';
+            
+            console.log(`🏁 MISSION COMPLETE: ${correctAnswers}/${totalQuestions} (${percentage}%)`);
+        }
+
+        // Reiniciar quiz
+        function restartQuiz() {
+            console.log('🔄 RESETTING MATRIX...');
+            initQuiz();
+        }
+
+        // Inicializar al cargar la página
+        window.addEventListener('load', initQuiz);
+
+        // Funciones de consola para pruebas
+        window.hackTest = function() {
+            console.log('💀 === HACKER SYSTEM STATUS ===');
+            console.log(`TOTAL WORDS IN DATABASE: ${vocabulario.length}`);
+            console.log(`CURRENT MISSION TARGETS: ${quizQuestions.length}`);
+            console.log(`CURRENT HACK: ${currentQuestionIndex + 1}`);
+            console.log(`SUCCESSFUL HACKS: ${correctAnswers}, FAILED: ${incorrectAnswers}`);
+            if (quizQuestions[currentQuestionIndex]) {
+                const current = quizQuestions[currentQuestionIndex];
+                console.log(`TARGET WORD: "${current.word}" → ANSWER: "${current.correctAnswer}"`);
+                console.log(`DECOY OPTIONS:`, current.options);
+            }
+        };
+
+        window.skipMission = function() {
+            console.log('⏭️ SKIPPING TO FINAL MISSION...');
+            currentQuestionIndex = quizQuestions.length;
+            showFinalScore();
+        };
+
+        console.log(`
+💀 === HACKER CONSOLE ACTIVATED ===
+🔥 TOTAL VOCABULARY: ${vocabulario.length} WORDS
+• hackTest() - System status
+• skipMission() - Jump to final score
+• restartQuiz() - Reset matrix
+=====================================
+        `);
+
+        // Remover el cursor typing después de un tiempo
+        setTimeout(() => {
+            document.querySelector('h1').classList.remove('typing');
+        }, 2000);
+    </script>
+</body>
+</html>
