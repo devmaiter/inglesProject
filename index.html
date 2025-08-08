@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 HACKER VOCABULARY QUIZ</title>
+    <title>🔥 SMART HACKER VOCABULARY QUIZ</title>
     <style>
         * {
             margin: 0;
@@ -114,6 +114,27 @@
             50% { transform: scale(1.05); }
         }
 
+        /* NUEVO: Stats de aprendizaje */
+        .learning-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #001a00 0%, #003300 100%);
+            padding: 8px;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .stat-mastered { border-color: #00ff00; color: #00ff00; }
+        .stat-learning { border-color: #ffff00; color: #ffff00; }
+        .stat-failed { border-color: #ff6600; color: #ff6600; }
+
         .word-display {
             background: linear-gradient(135deg, #001a1a 0%, #004d4d 100%);
             color: #00ffff;
@@ -128,6 +149,25 @@
                 inset 0 0 10px rgba(0, 255, 255, 0.1);
             animation: wordGlow 3s ease-in-out infinite alternate;
             letter-spacing: 1px;
+            position: relative;
+        }
+
+        /* NUEVO: Indicador de dificultad */
+        .word-display::before {
+            content: attr(data-attempts);
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff6600;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
 
         @keyframes wordGlow {
@@ -268,6 +308,19 @@
             transform: translateY(-3px);
         }
 
+        /* NUEVO: Botón reset progress */
+        .reset-progress-btn {
+            background: linear-gradient(135deg, #1a0000 0%, #3d0000 100%);
+            color: #ff6600;
+            border-color: #ff6600;
+        }
+
+        .reset-progress-btn:hover {
+            background: linear-gradient(135deg, #3d0000 0%, #7a0000 100%);
+            box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
+            transform: translateY(-3px);
+        }
+
         .progress {
             background: #222;
             border: 1px solid #00ff00;
@@ -398,6 +451,11 @@
                 width: 100%;
                 max-width: 300px;
             }
+
+            .learning-stats {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
         }
 
         /* Efecto de escaneo */
@@ -420,7 +478,23 @@
 <body>
     <div class="container">
         <div class="scan-line"></div>
-        <h1 class="typing">💀 HACKER VOCABULARY QUIZ</h1>
+        <h1 class="typing">🧠 SMART HACKER VOCABULARY</h1>
+        
+        <!-- NUEVO: Stats de aprendizaje -->
+        <div class="learning-stats">
+            <div class="stat-item stat-mastered">
+                <div>💚 MASTERED</div>
+                <div><span id="mastered-count">0</span></div>
+            </div>
+            <div class="stat-item stat-learning">
+                <div>⚡ LEARNING</div>
+                <div><span id="learning-count">0</span></div>
+            </div>
+            <div class="stat-item stat-failed">
+                <div>🔥 PENDING</div>
+                <div><span id="pending-count">0</span></div>
+            </div>
+        </div>
         
         <div class="score-board">
             <div class="score-item">🎯 QUESTION: <span id="current-question">1</span>/<span id="total-questions">167</span></div>
@@ -429,7 +503,7 @@
         </div>
 
         <div class="progress-text">
-            <span id="progress-text">>>> HACKING PROGRESS...</span>
+            <span id="progress-text">>>> ADAPTIVE LEARNING...</span>
         </div>
         <div class="progress">
             <div class="progress-bar" id="progress-bar"></div>
@@ -437,7 +511,7 @@
 
         <div class="result-message" id="result-message"></div>
 
-        <div class="word-display" id="word-display">
+        <div class="word-display" id="word-display" data-attempts="0">
             LOADING MATRIX...
         </div>
 
@@ -451,288 +525,434 @@
 
         <div class="action-buttons">
             <button class="btn restart-btn" onclick="restartQuiz()">
-                🔄 RESET_MATRIX
+                🔄 NEW_SESSION
+            </button>
+            <button class="btn reset-progress-btn" onclick="resetProgress()">
+                💣 RESET_ALL
             </button>
         </div>
 
         <div class="final-score" id="final-score">
-            <h2>🔥 MISSION COMPLETE!</h2>
+            <h2>🔥 LEARNING SESSION COMPLETE!</h2>
             <p>SUCCESSFUL HACKS: <span id="final-correct">0</span></p>
             <p>FAILED ATTEMPTS: <span id="final-incorrect">0</span></p>
+            <p>WORDS MASTERED: <span id="final-mastered">0</span></p>
             <p>SUCCESS RATE: <span id="final-percentage">0</span>%</p>
             <p id="final-message"></p>
         </div>
     </div>
 
     <script>
-        // 🔥 VOCABULARIO COMPLETO - TODAS LAS 167 PALABRAS
-        const vocabulario = [
-            {"word": "psychiatrist", "meaning": "psiquiatra"},
-            {"word": "psychologist", "meaning": "psicólogo"},
-            {"word": "insights", "meaning": "ideas profundas / revelaciones"},
-            {"word": "attachment", "meaning": "apego"},
-            {"word": "illuminate", "meaning": "iluminar / aclarar"},
-            {"word": "drawing from", "meaning": "tomando de / inspirándose en"},
-            {"word": "early", "meaning": "temprano"},
-            {"word": "caregivers", "meaning": "cuidadores"},
-            {"word": "shape", "meaning": "formar / moldear"},
-            {"word": "patterns", "meaning": "patrones"},
-            {"word": "avoidant", "meaning": "evasivo / que evita"},
-            {"word": "healthier", "meaning": "más saludable"},
-            {"word": "as well as", "meaning": "así como / además de"},
-            {"word": "esteemed", "meaning": "estimado / respetado"},
-            {"word": "relationship behavior", "meaning": "comportamiento en las relaciones"},
-            {"word": "leading", "meaning": "que lleva a / conduciendo"},
-            {"word": "isolation", "meaning": "aislamiento"},
-            {"word": "inadequacy", "meaning": "insuficiencia / sensación de no ser suficiente"},
-            {"word": "attractiveness", "meaning": "atractivo / nivel de atracción"},
-            {"word": "commitment", "meaning": "compromiso"},
-            {"word": "worries", "meaning": "preocupaciones"},
-            {"word": "reflecting", "meaning": "reflexionando / reflejando"},
-            {"word": "intimacy", "meaning": "intimidad"},
-            {"word": "closeness", "meaning": "cercanía emocional"},
-            {"word": "turmoil", "meaning": "confusión / agitación"},
-            {"word": "highlighting", "meaning": "destacando / resaltando"},
-            {"word": "despite", "meaning": "a pesar de"},
-            {"word": "rooted", "meaning": "arraigado"},
-            {"word": "stressful", "meaning": "estresante"},
-            {"word": "such as", "meaning": "como por ejemplo"},
-            {"word": "behaviors", "meaning": "comportamientos"},
-            {"word": "enhancing", "meaning": "mejorando / potenciando"},
-            {"word": "foster", "meaning": "fomentar / cultivar"},
-            {"word": "encouraged", "meaning": "animado / impulsado"},
-            {"word": "enhance", "meaning": "mejorar / realzar"},
-            {"word": "further", "meaning": "más allá / adicionalmente"},
-            {"word": "struggle", "meaning": "lucha / dificultad"},
-            {"word": "deep", "meaning": "profundo"},
-            {"word": "loneliness", "meaning": "soledad"},
-            {"word": "lack", "meaning": "falta"},
-            {"word": "fulfillment", "meaning": "realización / plenitud"},
-            {"word": "concerns", "meaning": "preocupaciones / inquietudes"},
-            {"word": "isolation—even in long-term", "meaning": "aislamiento, incluso en relaciones largas"},
-            {"word": "straightforward", "meaning": "directo / sencillo"},
-            {"word": "led", "meaning": "llevó / condujo"},
-            {"word": "within", "meaning": "dentro de"},
-            {"word": "affectionate", "meaning": "cariñoso"},
-            {"word": "craves", "meaning": "anhela"},
-            {"word": "preoccupied", "meaning": "preocupado / absorbido"},
-            {"word": "partner's affection", "meaning": "afecto de la pareja"},
-            {"word": "values independence", "meaning": "valora la independencia"},
-            {"word": "themselves", "meaning": "ellos mismos"},
-            {"word": "misunderstandings", "meaning": "malentendidos"},
-            {"word": "behavior", "meaning": "comportamiento"},
-            {"word": "clashed", "meaning": "chocaron / entraron en conflicto"},
-            {"word": "avoidant tendencies", "meaning": "tendencias evasivas"},
-            {"word": "strain", "meaning": "tensión"},
-            {"word": "are rooted", "meaning": "están arraigadas"},
-            {"word": "close relationships", "meaning": "relaciones cercanas"},
-            {"word": "advocate", "meaning": "defensor / proponer"},
-            {"word": "lens", "meaning": "lente / perspectiva"},
-            {"word": "well-being", "meaning": "bienestar"},
-            {"word": "encourage", "meaning": "animar / fomentar"},
-            {"word": "delve", "meaning": "profundizar"},
-            {"word": "deeper", "meaning": "más profundo"},
-            {"word": "toward", "meaning": "hacia"},
-            {"word": "partnerships", "meaning": "asociaciones / relaciones de pareja"},
-            {"word": "appeared", "meaning": "apareció / parecía"},
-            {"word": "couple", "meaning": "pareja"},
-            {"word": "arose", "meaning": "surgió"},
-            {"word": "amidst", "meaning": "en medio de"},
-            {"word": "desired", "meaning": "deseado"},
-            {"word": "differing needs", "meaning": "necesidades diferentes"},
-            {"word": "sought", "meaning": "buscó"},
-            {"word": "reassurance", "meaning": "tranquilidad / reafirmación"},
-            {"word": "misinterpreting", "meaning": "malinterpretando"},
-            {"word": "needy", "meaning": "necesitado / dependiente emocional"},
-            {"word": "neediness", "meaning": "necesidad excesiva"},
-            {"word": "desire", "meaning": "deseo"},
-            {"word": "flaw", "meaning": "defecto"},
-            {"word": "understood", "meaning": "entendido"},
-            {"word": "downplay", "meaning": "minimizar"},
-            {"word": "emotional closeness", "meaning": "cercanía emocional"},
-            {"word": "independence over intimacy", "meaning": "independencia por encima de la intimidad"},
-            {"word": "child-rearing", "meaning": "crianza de los hijos"},
-            {"word": "discouraged", "meaning": "desanimado / inhibido"},
-            {"word": "labeling", "meaning": "etiquetar"},
-            {"word": "weakness", "meaning": "debilidad"},
-            {"word": "reshaped", "meaning": "transformado / reformado"},
-            {"word": "bonds", "meaning": "vínculos"},
-            {"word": "self-help narratives", "meaning": "discursos de autoayuda"},
-            {"word": "conflate", "meaning": "confundir / mezclar"},
-            {"word": "dysfunction", "meaning": "disfunción"},
-            {"word": "promoting", "meaning": "promoviendo"},
-            {"word": "self-sufficiency", "meaning": "autosuficiencia"},
-            {"word": "harmful", "meaning": "dañino"},
-            {"word": "overlooking", "meaning": "ignorando / dejando pasar"},
-            {"word": "realities", "meaning": "realidades"},
-            {"word": "sustainability", "meaning": "sostenibilidad"},
-            {"word": "reinforce", "meaning": "reforzar"},
-            {"word": "innate", "meaning": "innato"},
-            {"word": "navigating", "meaning": "navegando / manejando"},
-            {"word": "interconnectedness", "meaning": "interconexión"},
-            {"word": "grown-ups", "meaning": "adultos"},
-            {"word": "thrive", "meaning": "prosperar / florecer"},
-            {"word": "supportive", "meaning": "de apoyo / que brinda soporte"},
-            {"word": "unmet", "meaning": "no satisfecho / no correspondido"},
-            {"word": "distress", "meaning": "angustia"},
-            {"word": "bolster", "meaning": "reforzar / apoyar"},
-            {"word": "unsatisfying ones", "meaning": "relaciones insatisfactorias"},
-            {"word": "chronic", "meaning": "crónico"},
-            {"word": "risks", "meaning": "riesgos"},
-            {"word": "fulfills", "meaning": "satisface / cumple"},
-            {"word": "promotes", "meaning": "promueve"},
-            {"word": "awareness", "meaning": "conciencia"},
-            {"word": "empowering", "meaning": "empoderador / fortalecedor"},
-            
-            // PALABRAS EN ESPAÑOL CON TRADUCCIÓN AL INGLÉS
-            {"word": "paradigms", "meaning": "paradigmas"},
-            {"word": "to allow", "meaning": "permitir"},
-            {"word": "to take out", "meaning": "sacar"},
-            {"word": "to set out to", "meaning": "proponerse"},
-            {"word": "to solve", "meaning": "resolver"},
-            {"word": "diploma", "meaning": "diploma"},
-            {"word": "author", "meaning": "autor"},
-            {"word": "over there", "meaning": "allá"},
-            {"word": "pending", "meaning": "pendiente"},
-            {"word": "to take", "meaning": "tomar"},
-            {"word": "characteristics", "meaning": "características"},
-            {"word": "bakery", "meaning": "panadería"},
-            {"word": "pastry shop", "meaning": "pastelería"},
-            {"word": "to imagine", "meaning": "imaginar"},
-            {"word": "you must", "meaning": "debes"},
-            {"word": "mold", "meaning": "molde"},
-            {"word": "let me", "meaning": "déjame"},
-            {"word": "to save", "meaning": "ahorrar"},
-            {"word": "to instantiate", "meaning": "instanciar"},
-            {"word": "to define", "meaning": "definir"},
-            {"word": "advantage", "meaning": "ventaja"},
-            {"word": "prototypes", "meaning": "prototipos"},
-            {"word": "during", "meaning": "durante"},
-            {"word": "abstraction", "meaning": "abstracción"},
-            {"word": "let's move on", "meaning": "pasemos"},
-            {"word": "inheritance", "meaning": "herencia"},
-            {"word": "referee", "meaning": "árbitro"},
-            {"word": "goalkeeper", "meaning": "portero"},
-            {"word": "to hide", "meaning": "esconder"},
-            {"word": "depth", "meaning": "profundidad"},
-            {"word": "to internalize", "meaning": "interiorizar"},
-            {"word": "to indicate", "meaning": "indicar"},
-            {"word": "associative", "meaning": "asociativo"},
-            {"word": "key", "meaning": "clave"},
-            {"word": "separated", "meaning": "separados"},
-            {"word": "I finish", "meaning": "acabo"},
-            {"word": "besides", "meaning": "además"},
-            {"word": "to grab", "meaning": "agarrar"},
-            {"word": "interesting", "meaning": "interesante"},
-            {"word": "reserved", "meaning": "reservada"},
-            {"word": "to analyze", "meaning": "analizar"},
-            {"word": "to notice", "meaning": "fijarse"},
-            {"word": "to appear", "meaning": "aparecer"},
-            {"word": "to affect", "meaning": "afectar"},
-            {"word": "parenthesis", "meaning": "paréntesis"},
-            {"word": "even", "meaning": "incluso"},
-            {"word": "to receive", "meaning": "recibir"},
-            {"word": "to have", "meaning": "tener"},
-            {"word": "any", "meaning": "cualquier"},
-            {"word": "passing", "meaning": "pasando"},
-            {"word": "we have", "meaning": "hemos"},
-            {"word": "only", "meaning": "solamente"},
-            {"word": "to say", "meaning": "decir"},
-            {"word": "confusion", "meaning": "confusión"},
-            {"word": "several", "meaning": "varias"},
-            {"word": "review", "meaning": "repasa"}
-        ];
+        // 🔥 VOCABULARIO COMPLETO
+const vocabularioAvanzado = [
+    // Palabras no muy comunes (nivel A1–B1)
+    { word: "aware", meaning: "consciente" },
+    { word: "borrow", meaning: "pedir prestado" },
+    { word: "complain", meaning: "quejarse" },
+    { word: "careful", meaning: "cuidadoso" },
+    { word: "decide", meaning: "decidir" },
+    { word: "distant", meaning: "lejano" },
+    { word: "enough", meaning: "suficiente" },
+    { word: "except", meaning: "excepto" },
+    { word: "famous", meaning: "famoso" },
+    { word: "few", meaning: "pocos" },
+    { word: "fix", meaning: "arreglar" },
+    { word: "follow", meaning: "seguir" },
+    { word: "forget", meaning: "olvidar" },
+    { word: "friendly", meaning: "amigable" },
+    { word: "hardly", meaning: "apenas" },
+    { word: "hide", meaning: "esconder" },
+    { word: "hope", meaning: "esperar (desear)" },
+    { word: "hurry", meaning: "apresurarse" },
+    { word: "include", meaning: "incluir" },
+    { word: "invite", meaning: "invitar" },
+    { word: "keep", meaning: "mantener" },
+    { word: "laugh", meaning: "reír" },
+    { word: "lazy", meaning: "perezoso" },
+    { word: "loud", meaning: "ruidoso" },
+    { word: "miss", meaning: "extrañar / perder" },
+    { word: "nearly", meaning: "casi" },
+    { word: "notice", meaning: "notar" },
+    { word: "offer", meaning: "ofrecer" },
+    { word: "own", meaning: "poseer / propio" },
+    { word: "pick", meaning: "escoger" },
+    { word: "quiet", meaning: "silencioso" },
+    { word: "receive", meaning: "recibir" },
+    { word: "reply", meaning: "responder" },
+    { word: "rest", meaning: "descansar / el resto" },
+    { word: "save", meaning: "guardar / salvar" },
+    { word: "shout", meaning: "gritar" },
+    { word: "smell", meaning: "oler" },
+    { word: "spend", meaning: "gastar (dinero o tiempo)" },
+    { word: "strange", meaning: "extraño" },
+    { word: "wait", meaning: "esperar (tiempo)" },
 
-        // Variables del juego
-        let currentQuestionIndex = 0;
-        let correctAnswers = 0;
-        let incorrectAnswers = 0;
-        let selectedOption = null;
-        let quizQuestions = [];
+    // Palabras más complejas (A2–B1 alto)
+    { word: "achieve", meaning: "lograr / alcanzar" },
+    { word: "allow", meaning: "permitir" },
+    { word: "arrange", meaning: "organizar / arreglar" },
+    { word: "attend", meaning: "asistir" },
+    { word: "avoid", meaning: "evitar" },
+    { word: "belong", meaning: "pertenecer" },
+    { word: "behave", meaning: "comportarse" },
+    { word: "compare", meaning: "comparar" },
+    { word: "complaint", meaning: "queja" },
+    { word: "confuse", meaning: "confundir" },
+    { word: "consider", meaning: "considerar" },
+    { word: "contain", meaning: "contener" },
+    { word: "convince", meaning: "convencer" },
+    { word: "create", meaning: "crear" },
+    { word: "damage", meaning: "dañar / daño" },
+    { word: "delay", meaning: "retrasar / retraso" },
+    { word: "depend", meaning: "depender" },
+    { word: "develop", meaning: "desarrollar" },
+    { word: "discover", meaning: "descubrir" },
+    { word: "doubt", meaning: "dudar / duda" },
+    { word: "earn", meaning: "ganar (dinero, respeto)" },
+    { word: "encourage", meaning: "animar / alentar" },
+    { word: "enjoyable", meaning: "agradable / divertido" },
+    { word: "expect", meaning: "esperar (algo probable)" },
+    { word: "explain", meaning: "explicar" },
+    { word: "fail", meaning: "fallar / fracasar" },
+    { word: "gather", meaning: "reunir / recoger" },
+    { word: "improve", meaning: "mejorar" },
+    { word: "increase", meaning: "aumentar" },
+    { word: "involve", meaning: "involucrar" },
+    { word: "mention", meaning: "mencionar" },
+    { word: "noticeable", meaning: "notable / que se nota" },
+    { word: "prefer", meaning: "preferir" },
+    { word: "provide", meaning: "proporcionar" },
+    { word: "realize", meaning: "darse cuenta" },
+    { word: "recognize", meaning: "reconocer" },
+    { word: "reduce", meaning: "reducir" },
+    { word: "remind", meaning: "recordar (hacer recordar)" },
+    { word: "suggest", meaning: "sugerir" },
+    { word: "wonder", meaning: "preguntarse / maravillarse" }
+];
+
+        // 🧠 SISTEMA DE APRENDIZAJE INTELIGENTE
+        let wordStats = {}; // {word: {attempts: 0, correct: 0, mastered: false, lastSeen: Date}}
+        let learningQueue = []; // Palabras que necesitan práctica
+        let sessionStats = {
+            questionsAnswered: 0,
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            wordsLearned: 0
+        };
+
+        let currentWord = null;
         let hasAnswered = false;
 
-        // 🚀 GENERAR TODAS LAS PREGUNTAS (167 PALABRAS)
-        function generateQuizQuestions() {
-            const shuffledVocab = [...vocabulario].sort(() => Math.random() - 0.5);
-            quizQuestions = shuffledVocab.map(item => {
-                return generateQuestionOptions(item);
+        // 🚀 INICIALIZAR SISTEMA
+        function initializeLearningSystem() {
+            console.log('🧠 INITIALIZING SMART LEARNING SYSTEM...');
+            
+            // Cargar progreso desde localStorage
+            loadProgress();
+            
+            // Inicializar stats para palabras nuevas
+            vocabulario.forEach(word => {
+                if (!wordStats[word.word]) {
+                    wordStats[word.word] = {
+                        attempts: 0,
+                        correct: 0,
+                        mastered: false,
+                        lastSeen: null,
+                        failCount: 0
+                    };
+                }
             });
-        }
-
-        // Generar opciones para una pregunta
-        function generateQuestionOptions(correctItem) {
-            const options = [correctItem.meaning];
             
-            // Obtener 3 opciones incorrectas aleatorias
-            const otherWords = vocabulario.filter(w => w.word !== correctItem.word);
-            const shuffledOthers = otherWords.sort(() => Math.random() - 0.5);
+            // Construir cola de aprendizaje
+            buildLearningQueue();
             
-            for (let i = 0; i < 3 && i < shuffledOthers.length; i++) {
-                options.push(shuffledOthers[i].meaning);
-            }
-            
-            // Mezclar las opciones
-            const shuffledOptions = options.sort(() => Math.random() - 0.5);
-            
-            return {
-                word: correctItem.word,
-                correctAnswer: correctItem.meaning,
-                options: shuffledOptions
+            // Resetear stats de sesión
+            sessionStats = {
+                questionsAnswered: 0,
+                correctAnswers: 0,
+                incorrectAnswers: 0,
+                wordsLearned: 0
             };
+            
+            updateLearningStats();
+            loadNextWord();
         }
 
-        // Inicializar quiz
-        function initQuiz() {
-            console.log('🔥 INITIALIZING HACKER VOCABULARY MATRIX...');
-            console.log(`💀 TOTAL WORDS TO HACK: ${vocabulario.length}`);
-            generateQuizQuestions(); // Genera TODAS las palabras
-            currentQuestionIndex = 0;
-            correctAnswers = 0;
-            incorrectAnswers = 0;
-            updateScoreBoard();
-            loadCurrentQuestion();
-            document.getElementById('final-score').style.display = 'none';
+        // 📊 CONSTRUIR COLA DE APRENDIZAJE INTELIGENTE
+        function buildLearningQueue() {
+            learningQueue = [];
+            
+            // Separar palabras por estado
+            let newWords = [];
+            let failedWords = [];
+            let reviewWords = [];
+            
+            vocabulario.forEach(item => {
+                const stats = wordStats[item.word];
+                
+                if (stats.mastered) {
+                    // Palabras dominadas - ocasionalmente para repaso
+                    if (Math.random() < 0.1) reviewWords.push(item);
+                } else if (stats.attempts === 0) {
+                    // Palabras nuevas
+                    newWords.push(item);
+                } else if (stats.failCount > stats.correct) {
+                    // Palabras con más fallos que aciertos - prioridad alta
+                    for (let i = 0; i < Math.min(3, stats.failCount); i++) {
+                        failedWords.push(item);
+                    }
+                } else {
+                    // Palabras en proceso de aprendizaje
+                    reviewWords.push(item);
+                }
+            });
+            
+            // Mezclar cada categoría
+            newWords = shuffleArray(newWords);
+            failedWords = shuffleArray(failedWords);
+            reviewWords = shuffleArray(reviewWords);
+            
+            // Construir cola: palabras fallidas (prioridad), nuevas, repaso
+            learningQueue = [...failedWords, ...newWords, ...reviewWords];
+            
+            console.log(`📚 Learning Queue: ${failedWords.length} failed, ${newWords.length} new, ${reviewWords.length} review`);
         }
 
-        // Cargar pregunta actual
-        function loadCurrentQuestion() {
-            if (currentQuestionIndex >= quizQuestions.length) {
-                showFinalScore();
-                return;
+        // 🎯 CARGAR SIGUIENTE PALABRA
+        function loadNextWord() {
+            if (learningQueue.length === 0) {
+                // Reconstruir cola si está vacía
+                buildLearningQueue();
+                if (learningQueue.length === 0) {
+                    showCompletionMessage();
+                    return;
+                }
             }
 
-            const question = quizQuestions[currentQuestionIndex];
+            currentWord = learningQueue.shift();
+            const stats = wordStats[currentWord.word];
             hasAnswered = false;
-            selectedOption = null;
             
-            // Actualizar UI con efecto de typing
+            // Actualizar UI
             const wordDisplay = document.getElementById('word-display');
             wordDisplay.textContent = '';
-            typeText(wordDisplay, question.word.toUpperCase(), 50);
+            wordDisplay.setAttribute('data-attempts', stats.attempts);
+            typeText(wordDisplay, currentWord.word.toUpperCase(), 50);
             
             document.getElementById('result-message').style.display = 'none';
             
-            // Limpiar opciones anteriores
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
+            // Generar opciones
+            generateOptions(currentWord);
             
-            // Crear botones de opciones con delay
-            question.options.forEach((option, index) => {
+            // Actualizar progreso
+            updateProgress();
+            updateLearningStats();
+            
+            console.log(`🎯 Current word: "${currentWord.word}" (attempts: ${stats.attempts}, correct: ${stats.correct})`);
+        }
+
+        // 🎲 GENERAR OPCIONES
+        function generateOptions(correctItem) {
+            const options = [correctItem.meaning];
+            
+            // Obtener 3 opciones incorrectas
+            const otherWords = vocabulario.filter(w => w.word !== correctItem.word);
+            const shuffled = shuffleArray(otherWords);
+            
+            for (let i = 0; i < 3 && i < shuffled.length; i++) {
+                options.push(shuffled[i].meaning);
+            }
+            
+            const shuffledOptions = shuffleArray(options);
+            
+            // Crear botones
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            shuffledOptions.forEach((option, index) => {
                 setTimeout(() => {
                     const button = document.createElement('button');
                     button.className = 'option-btn';
                     button.textContent = option.toUpperCase();
-                    button.onclick = () => selectOption(button, option, question.correctAnswer);
-                    optionsContainer.appendChild(button);
+                    button.onclick = () => selectOption(button, option, correctItem.meaning);
+                    container.appendChild(button);
                 }, index * 200);
             });
-            
-            updateProgress();
-            
-            console.log(`💀 HACKING: "${question.word}" → TARGET: "${question.correctAnswer}"`);
         }
 
-        // Efecto de typing para texto
+        // ✅ SELECCIONAR OPCIÓN
+        function selectOption(button, selectedAnswer, correctAnswer) {
+            if (hasAnswered) return;
+            
+            hasAnswered = true;
+            const isCorrect = selectedAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            const stats = wordStats[currentWord.word];
+            
+            // Actualizar estadísticas de la palabra
+            stats.attempts++;
+            stats.lastSeen = Date.now();
+            
+            // Marcar opciones visualmente
+            const allOptions = document.querySelectorAll('.option-btn');
+            allOptions.forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                if (btn.textContent.toLowerCase() === correctAnswer.toLowerCase()) {
+                    btn.classList.add('correct');
+                } else if (btn === button && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            if (isCorrect) {
+                // ✅ RESPUESTA CORRECTA
+                stats.correct++;
+                sessionStats.correctAnswers++;
+                
+                // Verificar si se domina la palabra (3 aciertos consecutivos sin fallos recientes)
+                if (stats.correct >= 2 && stats.failCount <= stats.correct) {
+                    stats.mastered = true;
+                    sessionStats.wordsLearned++;
+                    showResultMessage(`🔥 WORD MASTERED! "${currentWord.word}" ELIMINATED FROM TRAINING!`, 'correct');
+                } else {
+                    showResultMessage('>>> ACCESS GRANTED! HACK SUCCESSFUL! 🔥', 'correct');
+                }
+            } else {
+                // ❌ RESPUESTA INCORRECTA
+                stats.failCount++;
+                sessionStats.incorrectAnswers++;
+                stats.mastered = false; // Des-dominar si falla
+                
+                // Re-agregar a la cola para práctica adicional
+                const repeatCount = Math.min(2, stats.failCount);
+                for (let i = 0; i < repeatCount; i++) {
+                    learningQueue.unshift(currentWord);
+                }
+                
+                showResultMessage(`>>> ACCESS DENIED! TARGET: "${correctAnswer.toUpperCase()}" - WORD QUEUED FOR RETRY`, 'incorrect');
+            }
+            
+            sessionStats.questionsAnswered++;
+            saveProgress();
+            updateSessionStats();
+            
+            // Auto-avanzar
+            setTimeout(() => {
+                loadNextWord();
+            }, isCorrect && stats.mastered ? 3000 : 2500);
+        }
+
+        // 💾 GUARDAR PROGRESO
+        function saveProgress() {
+            try {
+                localStorage.setItem('hackerVocabProgress', JSON.stringify(wordStats));
+                console.log('💾 Progress saved');
+            } catch (e) {
+                console.warn('⚠️ Could not save progress:', e);
+            }
+        }
+
+        // 📖 CARGAR PROGRESO
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('hackerVocabProgress');
+                if (saved) {
+                    wordStats = JSON.parse(saved);
+                    console.log('📖 Progress loaded');
+                }
+            } catch (e) {
+                console.warn('⚠️ Could not load progress:', e);
+                wordStats = {};
+            }
+        }
+
+        // 🗑️ RESETEAR PROGRESO
+        function resetProgress() {
+            if (confirm('⚠️ This will DELETE all your learning progress!\n\nAre you sure?')) {
+                localStorage.removeItem('hackerVocabProgress');
+                wordStats = {};
+                console.log('🗑️ Progress reset');
+                initializeLearningSystem();
+            }
+        }
+
+        // 📊 ACTUALIZAR STATS DE APRENDIZAJE
+        function updateLearningStats() {
+            const mastered = Object.values(wordStats).filter(s => s.mastered).length;
+            const learning = Object.values(wordStats).filter(s => s.attempts > 0 && !s.mastered).length;
+            const pending = vocabulario.length - mastered - learning;
+            
+            document.getElementById('mastered-count').textContent = mastered;
+            document.getElementById('learning-count').textContent = learning;
+            document.getElementById('pending-count').textContent = pending;
+        }
+
+        // 📈 ACTUALIZAR STATS DE SESIÓN
+        function updateSessionStats() {
+            document.getElementById('current-question').textContent = sessionStats.questionsAnswered + 1;
+            document.getElementById('total-questions').textContent = `∞`;
+            document.getElementById('correct-score').textContent = sessionStats.correctAnswers;
+            document.getElementById('incorrect-score').textContent = sessionStats.incorrectAnswers;
+        }
+
+        // 🎉 MOSTRAR MENSAJE DE FINALIZACIÓN
+        function showCompletionMessage() {
+            const mastered = Object.values(wordStats).filter(s => s.mastered).length;
+            const total = vocabulario.length;
+            
+            if (mastered === total) {
+                showFinalScore();
+            } else {
+                showResultMessage('🧠 SESSION COMPLETE! REBUILDING LEARNING QUEUE...', 'correct');
+                setTimeout(() => {
+                    initializeLearningSystem();
+                }, 2000);
+            }
+        }
+
+        // 🏁 MOSTRAR PUNTUACIÓN FINAL
+        function showFinalScore() {
+            const mastered = Object.values(wordStats).filter(s => s.mastered).length;
+            const total = vocabulario.length;
+            const percentage = Math.round((mastered / total) * 100);
+            
+            document.getElementById('final-correct').textContent = sessionStats.correctAnswers;
+            document.getElementById('final-incorrect').textContent = sessionStats.incorrectAnswers;
+            document.getElementById('final-mastered').textContent = mastered;
+            document.getElementById('final-percentage').textContent = percentage;
+            
+            let message = '';
+            if (percentage === 100) {
+                message = '🧠 VOCABULARY MATRIX FULLY DECODED! ELITE HACKER STATUS!';
+            } else if (percentage >= 80) {
+                message = '🔥 ADVANCED HACKER! MOST SYSTEMS COMPROMISED!';
+            } else if (percentage >= 50) {
+                message = '💀 SKILLED HACKER! KEEP TRAINING FOR MASTERY!';
+            } else {
+                message = '⚡ LEARNING IN PROGRESS! PRACTICE MAKES PERFECT!';
+            }
+            
+            document.getElementById('final-message').textContent = message;
+            document.getElementById('final-score').style.display = 'block';
+        }
+
+        // 🔄 REINICIAR SESIÓN
+        function restartQuiz() {
+            document.getElementById('final-score').style.display = 'none';
+            initializeLearningSystem();
+        }
+
+        // 📊 ACTUALIZAR PROGRESO
+        function updateProgress() {
+            const mastered = Object.values(wordStats).filter(s => s.mastered).length;
+            const total = vocabulario.length;
+            const progress = (mastered / total) * 100;
+            
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = 
+                `>>> VOCABULARY MASTERY: ${Math.round(progress)}% COMPLETE`;
+        }
+
+        // 🎨 EFECTO DE TYPING
         function typeText(element, text, speed = 100) {
             let i = 0;
             const timer = setInterval(() => {
@@ -745,46 +965,7 @@
             }, speed);
         }
 
-        // Seleccionar opción con AUTO-AVANCE
-        function selectOption(button, selectedAnswer, correctAnswer) {
-            if (hasAnswered) return;
-            
-            hasAnswered = true;
-            selectedOption = selectedAnswer;
-            
-            // Marcar todas las opciones
-            const allOptions = document.querySelectorAll('.option-btn');
-            allOptions.forEach(btn => {
-                btn.style.pointerEvents = 'none';
-                if (btn.textContent.toLowerCase() === correctAnswer.toLowerCase()) {
-                    btn.classList.add('correct');
-                } else if (btn === button && selectedAnswer.toLowerCase() !== correctAnswer.toLowerCase()) {
-                    btn.classList.add('incorrect');
-                }
-            });
-            
-            // Actualizar puntuación
-            const isCorrect = selectedAnswer.toLowerCase() === correctAnswer.toLowerCase();
-            if (isCorrect) {
-                correctAnswers++;
-                showResultMessage('>>> ACCESS GRANTED! HACK SUCCESSFUL! 🔥', 'correct');
-            } else {
-                incorrectAnswers++;
-                showResultMessage(`>>> ACCESS DENIED! TARGET WAS: ${correctAnswer.toUpperCase()}`, 'incorrect');
-            }
-            
-            updateScoreBoard();
-            
-            console.log(`${isCorrect ? '✅ HACK SUCCESS' : '❌ HACK FAILED'}: "${selectedAnswer}" (TARGET: "${correctAnswer}")`);
-            
-            // 🚀 AUTO-AVANZAR después de 2.5 segundos
-            setTimeout(() => {
-                currentQuestionIndex++;
-                loadCurrentQuestion();
-            }, 2500);
-        }
-
-        // Mostrar mensaje de resultado
+        // 📝 MOSTRAR MENSAJE DE RESULTADO
         function showResultMessage(message, type) {
             const resultMsg = document.getElementById('result-message');
             resultMsg.textContent = '';
@@ -793,97 +974,54 @@
             typeText(resultMsg, message, 30);
         }
 
-        // Función nextQuestion ya no es necesaria pero la mantenemos por compatibilidad
-        function nextQuestion() {
-            currentQuestionIndex++;
-            loadCurrentQuestion();
-        }
-
-        // Actualizar marcador
-        function updateScoreBoard() {
-            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
-            document.getElementById('total-questions').textContent = quizQuestions.length;
-            document.getElementById('correct-score').textContent = correctAnswers;
-            document.getElementById('incorrect-score').textContent = incorrectAnswers;
-        }
-
-        // Actualizar progreso
-        function updateProgress() {
-            const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-            document.getElementById('progress-text').textContent = 
-                `>>> INFILTRATING SYSTEM... ${Math.round(progress)}% COMPLETE`;
-        }
-
-        // Mostrar puntuación final
-        function showFinalScore() {
-            const totalQuestions = quizQuestions.length;
-            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
-            
-            document.getElementById('final-correct').textContent = correctAnswers;
-            document.getElementById('final-incorrect').textContent = incorrectAnswers;
-            document.getElementById('final-percentage').textContent = percentage;
-            
-            // Mensaje según el rendimiento
-            let message = '';
-            if (percentage >= 90) {
-                message = '🔥 ELITE HACKER STATUS! MATRIX DOMINATED!';
-            } else if (percentage >= 70) {
-                message = '💀 SKILLED HACKER! SYSTEM COMPROMISED!';
-            } else if (percentage >= 50) {
-                message = '⚡ AMATEUR HACKER. KEEP TRAINING!';
-            } else {
-                message = '💣 ACCESS DENIED. ENHANCE YOUR SKILLS!';
+        // 🔀 MEZCLAR ARRAY
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            
-            document.getElementById('final-message').textContent = message;
-            document.getElementById('final-score').style.display = 'block';
-            
-            console.log(`🏁 MISSION COMPLETE: ${correctAnswers}/${totalQuestions} (${percentage}%)`);
+            return shuffled;
         }
 
-        // Reiniciar quiz
-        function restartQuiz() {
-            console.log('🔄 RESETTING MATRIX...');
-            initQuiz();
-        }
+        // 🚀 INICIALIZAR AL CARGAR
+        window.addEventListener('load', () => {
+            initializeLearningSystem();
+            
+            // Remover cursor typing
+            setTimeout(() => {
+                document.querySelector('h1').classList.remove('typing');
+            }, 2000);
+        });
 
-        // Inicializar al cargar la página
-        window.addEventListener('load', initQuiz);
-
-        // Funciones de consola para pruebas
-        window.hackTest = function() {
-            console.log('💀 === HACKER SYSTEM STATUS ===');
-            console.log(`TOTAL WORDS IN DATABASE: ${vocabulario.length}`);
-            console.log(`CURRENT MISSION TARGETS: ${quizQuestions.length}`);
-            console.log(`CURRENT HACK: ${currentQuestionIndex + 1}`);
-            console.log(`SUCCESSFUL HACKS: ${correctAnswers}, FAILED: ${incorrectAnswers}`);
-            if (quizQuestions[currentQuestionIndex]) {
-                const current = quizQuestions[currentQuestionIndex];
-                console.log(`TARGET WORD: "${current.word}" → ANSWER: "${current.correctAnswer}"`);
-                console.log(`DECOY OPTIONS:`, current.options);
-            }
+        // 🛠️ FUNCIONES DE CONSOLA PARA DEBUG
+        window.hackStats = function() {
+            console.log('🧠 === LEARNING SYSTEM STATUS ===');
+            console.log('Word Stats:', wordStats);
+            console.log('Learning Queue Length:', learningQueue.length);
+            console.log('Session Stats:', sessionStats);
+            
+            const mastered = Object.values(wordStats).filter(s => s.mastered).length;
+            const learning = Object.values(wordStats).filter(s => s.attempts > 0 && !s.mastered).length;
+            console.log(`Progress: ${mastered} mastered, ${learning} learning, ${vocabulario.length - mastered - learning} pending`);
         };
 
-        window.skipMission = function() {
-            console.log('⏭️ SKIPPING TO FINAL MISSION...');
-            currentQuestionIndex = quizQuestions.length;
+        window.forceComplete = function() {
+            Object.keys(wordStats).forEach(word => {
+                wordStats[word].mastered = true;
+            });
+            saveProgress();
             showFinalScore();
         };
 
         console.log(`
-💀 === HACKER CONSOLE ACTIVATED ===
-🔥 TOTAL VOCABULARY: ${vocabulario.length} WORDS
-• hackTest() - System status
-• skipMission() - Jump to final score
-• restartQuiz() - Reset matrix
-=====================================
+🧠 === SMART LEARNING SYSTEM ACTIVATED ===
+🎯 ADAPTIVE VOCABULARY TRAINING
+• hackStats() - System status  
+• forceComplete() - Mark all complete
+• resetProgress() - Clear all data
+=========================================
         `);
-
-        // Remover el cursor typing después de un tiempo
-        setTimeout(() => {
-            document.querySelector('h1').classList.remove('typing');
-        }, 2000);
     </script>
 </body>
 </html>
