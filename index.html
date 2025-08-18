@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🔥 HACKER VOCABULARY QUIZ</title>
   <style>
+    /* --- ESTILOS GENERALES --- */
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family:'Courier New', monospace;
@@ -15,406 +16,488 @@
     body::before {
       content:''; position:fixed; inset:0;
       background-image:
-        radial-gradient(circle at 20% 20%, rgba(0,255,0,.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(0,255,255,.1) 0%, transparent 50%),
-        radial-gradient(circle at 60% 40%, rgba(0,150,0,.05) 0%, transparent 50%);
-      animation:matrix 20s infinite linear; pointer-events:none; z-index:-1;
+        radial-gradient(circle at 20% 20%, rgba(0,255,0,.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0,255,0,.06) 0%, transparent 45%);
+      pointer-events:none;
     }
-    @keyframes matrix { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
-
     .container {
-      background:rgba(0,0,0,.9); border:2px solid #00ff00; border-radius:10px; padding:30px;
-      box-shadow:0 0 30px rgba(0,255,0,.3), inset 0 0 20px rgba(0,255,0,.1);
-      text-align:center; max-width:760px; width:100%;
-      animation:scanlines 2s infinite linear, glow 3s ease-in-out infinite alternate;
-      position:relative;
+      width:100%; max-width:950px; background:rgba(0,0,0,.55);
+      border:1px solid #0f7; border-radius:16px; box-shadow:0 0 30px rgba(0,255,140,.15);
+      padding:28px; backdrop-filter: blur(3px);
     }
-    @keyframes scanlines {
-      0%{box-shadow:0 0 30px rgba(0,255,0,.3), inset 0 0 20px rgba(0,255,0,.1)}
-      50%{box-shadow:0 0 40px rgba(0,255,0,.5), inset 0 0 30px rgba(0,255,0,.2)}
-      100%{box-shadow:0 0 30px rgba(0,255,0,.3), inset 0 0 20px rgba(0,255,0,.1)}
+    .title {
+      display:flex; gap:10px; align-items:center; margin-bottom:12px;
+      font-size:26px; letter-spacing:1px;
     }
-    @keyframes glow { from{border-color:#00ff00} to{border-color:#00ffff} }
-
-    h1 { color:#00ffff; margin-bottom:20px; font-size:2.2rem; font-weight:700;
-      text-shadow:0 0 10px #00ffff; letter-spacing:2px; animation:flicker 2s infinite; }
-    @keyframes flicker {0%,100%{opacity:1} 50%{opacity:.8}}
-
-    .score-board {
-      display:flex; justify-content:space-around; background:linear-gradient(135deg,#001100 0%,#003300 100%);
-      color:#00ff00; padding:15px; border:1px solid #00ff00; border-radius:8px; margin-bottom:20px; font-weight:700;
-      box-shadow:0 0 15px rgba(0,255,0,.4);
+    .sub {
+      color:#7bffbf; font-size:14px; opacity:.9; margin-bottom:18px;
     }
-    .score-item { animation:pulse 2s infinite }
-    @keyframes pulse {0%,100%{transform:scale(1)} 50%{transform:scale(1.05)}}
-
-    .progress-text { font-size:.95rem; color:#00ff00; margin-bottom:10px; font-weight:700; text-shadow:0 0 5px #00ff00; }
-    .progress { background:#222; border:1px solid #00ff00; border-radius:10px; height:10px; margin-bottom:20px; overflow:hidden; }
-    .progress-bar { background:linear-gradient(90deg,#00ff00,#00ffff); height:100%; transition:width .4s ease; border-radius:8px; }
-    .result-message { padding:12px; border-radius:8px; margin-bottom:16px; font-weight:700; display:none; border:2px solid; }
-    .result-message.correct{
-      background:linear-gradient(135deg,#001100,#003300); color:#00ff00; border-color:#00ff00;
-      box-shadow:0 0 15px rgba(0,255,0,.5);
+    .panel {
+      display:grid; gap:16px; grid-template-columns: 1fr; margin-top:10px;
     }
-    .result-message.incorrect{
-      background:linear-gradient(135deg,#330000,#660000); color:#ffcccc; border-color:#ff0000;
-      box-shadow:0 0 15px rgba(255,0,0,.5);
+    .card {
+      border:1px solid #0f7; border-radius:14px; padding:18px;
+      background: rgba(0,0,0,.35);
     }
-
-    .word-display {
-      background:linear-gradient(135deg,#001a1a,#004d4d); color:#00ffff; padding:22px; border:2px solid #00ffff;
-      border-radius:10px; margin-bottom:16px; font-size:1.8rem; font-weight:700;
-      box-shadow:0 0 20px rgba(0,255,255,.4), inset 0 0 10px rgba(0,255,255,.1);
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    input[type="text"]{
+      flex:1; min-width:220px; padding:12px 14px; border-radius:10px;
+      border:1px solid #0f7; background:#0b130f; color:#b8ffda; outline:none;
     }
-    .question-text { font-size:1.1rem; color:#00ff00; margin-bottom:18px; font-weight:700; text-shadow:0 0 5px #00ff00; }
-
-    .options-container { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px; }
-    .option-btn {
-      background:linear-gradient(135deg,#001100,#002200); border:2px solid #00ff00; border-radius:8px; padding:14px 18px;
-      font-size:1rem; font-weight:700; color:#00ff00; cursor:pointer; transition:.25s; min-height:56px; display:flex;
-      align-items:center; justify-content:center; text-align:center; position:relative; overflow:hidden;
+    select {
+      padding:10px 12px; border-radius:10px; border:1px solid #0f7;
+      background:#0b130f; color:#b8ffda; outline:none;
     }
-    .option-btn:hover{ transform:translateY(-2px); box-shadow:0 10px 25px rgba(0,255,0,.35); border-color:#00ffff; color:#00ffff; }
-    .option-btn.correct{ background:linear-gradient(135deg,#004400,#008800); border-color:#00ff00; color:#fff; }
-    .option-btn.incorrect{ background:linear-gradient(135deg,#550000,#990000); border-color:#ff0000; color:#ffdddd; }
-
-    .action-buttons { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
-    .btn {
-      padding:12px 16px; font-size:1rem; font-weight:700; border:2px solid; border-radius:8px; cursor:pointer; transition:.25s;
-      min-width:160px; text-transform:uppercase; letter-spacing:1px; background:linear-gradient(135deg,#001a1a,#003d3d); color:#00ffff; border-color:#00ffff;
+    button {
+      padding:12px 16px; border-radius:10px; border:1px solid #0f7;
+      background:#062; color:#c9ffdf; cursor:pointer; font-weight:700;
+      transition: transform .07s ease, box-shadow .2s ease;
     }
-    .btn:hover{ transform:translateY(-3px); box-shadow:0 0 20px rgba(0,255,255,.45); }
-
-    .final-score {
-      background:linear-gradient(135deg,#000f0f,#001f1f); color:#00ffff; padding:24px; border:2px solid #00ffff; border-radius:12px;
-      margin-top:18px; display:none; box-shadow:0 0 30px rgba(0,255,255,.6);
+    button:hover { box-shadow:0 0 12px rgba(0,255,140,.35); }
+    button:active { transform:scale(.98); }
+    .word {
+      font-size:28px; color:#a2ffcf; font-weight:700; letter-spacing:.5px;
     }
-    .final-score h2{ margin-bottom:8px; font-size:1.8rem; color:#00ff00; text-shadow:0 0 10px #00ff00; }
-
-    .scan-line { position:absolute; top:0; left:0; width:100%; height:2px;
-      background:linear-gradient(90deg,transparent,#00ff00,transparent); animation:scan 3s infinite linear; }
-    @keyframes scan { 0%{top:0;opacity:1} 100%{top:100%;opacity:0} }
-
-    @media (max-width:480px){
-      .container{ padding:20px; margin:10px }
-      h1{ font-size:1.8rem }
-      .word-display{ font-size:1.4rem; padding:18px }
-      .options-container{ grid-template-columns:1fr }
-      .btn{ width:100%; max-width:320px }
+    .muted { color:#77e9b6a8; font-size:13px }
+    .status { font-size:15px; margin-top:8px; min-height:22px; }
+    .ok { color:#7eff9a }
+    .bad { color:#ff7676 }
+    .grid {
+      display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:10px;
+      margin-top:8px;
     }
+    .chip {
+      border:1px dashed #0f7; padding:8px 10px; border-radius:10px; font-size:13px; color:#9cffd1;
+      background:rgba(0,255,140,.04)
+    }
+    .footer {
+      margin-top:16px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; color:#7bffbf
+    }
+    .kbd { border:1px solid #0f7; padding:2px 6px; border-radius:6px; background:#072; color:#d1ffe9; font-weight:700 }
+    .counter { color:#a0ffd6; font-size:14px }
+    .sep { opacity:.35; margin:0 6px }
+    .small { font-size:12px; opacity:.8 }
+    .list {
+      max-height:220px; overflow:auto; border:1px solid #0f7; border-radius:12px; padding:10px;
+      background:rgba(0,0,0,.25)
+    }
+    .list-item {
+      display:flex; justify-content:space-between; gap:12px; padding:6px 4px; border-bottom:1px dashed #0f7;
+      font-size:14px;
+    }
+    .list-item:last-child { border-bottom:none }
+    .left { color:#c6ffe4 }
+    .right { color:#86ffc6 }
+    .hint { font-size:13px; color:#8bffd0 }
+    .hidden { display:none }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="scan-line"></div>
-    <h1>💀 HACKER VOCABULARY QUIZ</h1>
+    <div class="title">🔥 HACKER VOCABULARY QUIZ <span class="sep">|</span> <span class="small">A2 practice</span></div>
+    <div class="sub">Modo estudio y quiz rápido para tu lista personalizada.</div>
 
-    <div class="score-board">
-      <div class="score-item">🎯 QUESTION: <span id="current-question">1</span>/<span id="total-questions">0</span></div>
-      <div class="score-item">✅ CORRECT: <span id="correct-score">0</span></div>
-      <div class="score-item">❌ FAILED: <span id="incorrect-score">0</span></div>
-    </div>
+    <!-- CONTROLES -->
+    <div class="panel">
+      <div class="card">
+        <div class="row">
+          <label class="muted">Modo:</label>
+          <select id="mode">
+            <option value="en-es">EN ➜ ES (traduce al español)</option>
+            <option value="es-en">ES ➜ EN (traduce al inglés)</option>
+            <option value="spell">SPELL (deletrea en inglés)</option>
+          </select>
 
-    <div class="progress-text"><span id="progress-text">>>> HACKING PROGRESS...</span></div>
-    <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+          <label class="muted">Tipo de pregunta:</label>
+          <select id="questionType">
+            <option value="open">Respuesta abierta</option>
+            <option value="mc">Múltiple opción</option>
+          </select>
 
-    <div class="result-message" id="result-message"></div>
+          <button id="btnPrev">⟵ Anterior</button>
+          <button id="btnNext">Siguiente ⟶</button>
+          <button id="btnRandom">🎲 Aleatoria</button>
+        </div>
+      </div>
 
-    <div class="word-display" id="word-display">LOADING MATRIX...</div>
-    <div class="question-text" id="question-text">&gt; DECODE THE MEANING OF THIS WORD_</div>
+      <!-- TARJETA DE PREGUNTA -->
+      <div class="card">
+        <div id="prompt" class="word">—</div>
+        <div id="hint" class="hint muted"></div>
 
-    <div class="options-container" id="options-container"></div>
+        <!-- Respuesta abierta -->
+        <div id="openBlock" class="row" style="margin-top:10px;">
+          <input id="answer" type="text" placeholder="Escribe tu respuesta aquí…" autocomplete="off"/>
+          <button id="btnCheck">Comprobar</button>
+          <button id="btnShow">👀 Ver respuesta</button>
+        </div>
 
-    <div class="action-buttons">
-      <button class="btn" id="btn-translate">🧪 TRADUCIR PALABRA</button>
-      <button class="btn" id="btn-add">➕ AGREGAR PALABRA</button>
-      <button class="btn" id="btn-reset">🔄 RESET_MATRIX</button>
-    </div>
+        <!-- Múltiple opción -->
+        <div id="mcBlock" class="grid hidden"></div>
 
-    <div class="final-score" id="final-score">
-      <h2>🔥 MISSION COMPLETE!</h2>
-      <p>SUCCESSFUL HACKS: <span id="final-correct">0</span></p>
-      <p>FAILED ATTEMPTS: <span id="final-incorrect">0</span></p>
-      <p>SUCCESS RATE: <span id="final-percentage">0</span>%</p>
-      <p id="final-message"></p>
+        <div id="status" class="status"></div>
+        <div class="footer">
+          <span class="counter" id="counter">1 / 1</span>
+          <span class="sep">•</span>
+          <span class="muted">Atajos:</span>
+          <span class="kbd">Enter</span> comprobar
+          <span class="kbd">N</span> siguiente
+          <span class="kbd">R</span> aleatoria
+        </div>
+      </div>
+
+      <!-- LISTADO -->
+      <div class="card">
+        <div class="row" style="justify-content:space-between;">
+          <div class="muted">Lista completa</div>
+          <button id="btnToggleList">Mostrar/Ocultar</button>
+        </div>
+        <div id="listWrap" class="list hidden"></div>
+      </div>
     </div>
   </div>
 
   <script>
-    // =======================
-    //   1) BANCO DE PALABRAS
-    // =======================
+    // =========================
+    //   LISTA DE VOCABULARIO
+    // =========================
     const vocabulario = [
-      { word: "aware", meaning: "consciente" },
-      { word: "borrow", meaning: "pedir prestado" },
-      { word: "complain", meaning: "quejarse" },
-      { word: "careful", meaning: "cuidadoso" },
-      { word: "decide", meaning: "decidir" },
-      { word: "distant", meaning: "lejano" },
-      { word: "enough", meaning: "suficiente" },
-      { word: "except", meaning: "excepto" },
-      { word: "famous", meaning: "famoso" },
-      { word: "few", meaning: "pocos" },
-      { word: "fix", meaning: "arreglar" },
-      { word: "follow", meaning: "seguir" },
-      { word: "forget", meaning: "olvidar" },
-      { word: "friendly", meaning: "amigable" },
-      { word: "hardly", meaning: "apenas" },
-      { word: "hide", meaning: "esconder" },
-      { word: "hope", meaning: "esperar (desear)" },
-      { word: "hurry", meaning: "apresurarse" },
-      { word: "include", meaning: "incluir" },
-      { word: "invite", meaning: "invitar" },
-      { word: "keep", meaning: "mantener" },
-      { word: "laugh", meaning: "reír" },
-      { word: "lazy", meaning: "perezoso" },
-      { word: "loud", meaning: "ruidoso" },
-      { word: "miss", meaning: "extrañar / perder" },
-      { word: "nearly", meaning: "casi" },
-      { word: "notice", meaning: "notar" },
-      { word: "offer", meaning: "ofrecer" },
-      { word: "own", meaning: "poseer / propio" },
-      { word: "pick", meaning: "escoger" },
-      { word: "quiet", meaning: "silencioso" },
-      { word: "receive", meaning: "recibir" },
-      { word: "reply", meaning: "responder" },
-      { word: "rest", meaning: "descansar / el resto" },
-      { word: "save", meaning: "guardar / salvar" },
-      { word: "shout", meaning: "gritar" },
-      { word: "smell", meaning: "oler" },
-      { word: "spend", meaning: "gastar (dinero o tiempo)" },
-      { word: "strange", meaning: "extraño" },
-      { word: "wait", meaning: "esperar (tiempo)" },
+      {"word": "Pride", "meaning": "orgullo"},
+      {"word": "Mine", "meaning": "mío / mina"},
+      {"word": "Creeping", "meaning": "arrastrándose / avanzando lentamente"},
+      {"word": "Peanut", "meaning": "maní / cacahuate"},
+      {"word": "Butter", "meaning": "mantequilla"},
+      {"word": "Guess", "meaning": "adivinar / suponer"},
+      {"word": "Fools", "meaning": "tontos"},
+      {"word": "Snowflake", "meaning": "copo de nieve"},
+      {"word": "Wind", "meaning": "viento / enrollar"},
+      {"word": "Glimpse", "meaning": "vistazo"},
+      {"word": "Heatwaves", "meaning": "olas de calor"},
+      {"word": "Tight", "meaning": "ajustado / apretado"},
+      {"word": "Alright", "meaning": "está bien / ok"},
+      {"word": "Naked", "meaning": "desnudo"},
+      {"word": "Silhouettes", "meaning": "siluetas"},
+      {"word": "Shall", "meaning": "(futuro formal / sugerencia)"},
+      {"word": "Sea's", "meaning": "del mar"},
+      {"word": "Eastern", "meaning": "oriental / del este"},
+      {"word": "Journey", "meaning": "viaje"},
+      {"word": "Rings", "meaning": "anillos / suena"},
+      {"word": "Buzz", "meaning": "zumbido"},
+      {"word": "Heat", "meaning": "calor"},
+      {"word": "Disguise", "meaning": "disfraz / disfrazar"},
+      {"word": "Dime", "meaning": "moneda de diez centavos (EE.UU.)"},
+      {"word": "Jukebox", "meaning": "rockola"},
+      {"word": "Baggies", "meaning": "pantalones anchos (slang)"},
+      {"word": "Bushy", "meaning": "espeso / frondoso"},
+      {"word": "Blond", "meaning": "rubio"},
+      {"word": "Hairdo", "meaning": "peinado"},
+      {"word": "Trestles", "meaning": "caballetes"},
+      {"word": "Teaser", "meaning": "avance / adelanto"},
+      {"word": "Holy", "meaning": "santo / sagrado"},
+      {"word": "Kneejoker", "meaning": "reacción automática (knee-jerk)"},
+      {"word": "Shoeshine", "meaning": "lustrado de zapatos"},
+      {"word": "ToeJam", "meaning": "mugre entre los dedos (slang)"},
+      {"word": "Walrus", "meaning": "morsa"},
+      {"word": "Sideboard", "meaning": "aparador (mueble)"},
+      {"word": "Spinal", "meaning": "espinal / de la columna"},
+      {"word": "Cracker", "meaning": "galleta salada / petardo"},
+      {"word": "Grass", "meaning": "césped / hierba"},
+      {"word": "Frowning", "meaning": "frunciendo el ceño"},
+      {"word": "Blind", "meaning": "ciego"},
+      {"word": "Sight", "meaning": "vista / paisaje"},
+      {"word": "Chart", "meaning": "gráfico / tabla"},
+      {"word": "Sheets", "meaning": "sábanas / hojas"},
+      {"word": "Alibi", "meaning": "coartada"},
+      {"word": "Blame", "meaning": "culpa / culpar"},
+      {"word": "Chains", "meaning": "cadenas"},
+      {"word": "Docks", "meaning": "muelles"},
+      {"word": "Strike", "meaning": "golpear / huelga"},
+      {"word": "Brings", "meaning": "trae"},
+      {"word": "Prayer", "meaning": "oración / rezo"},
+      {"word": "Swear", "meaning": "jurar / maldecir"},
+      {"word": "Slipped", "meaning": "resbaló"},
+      {"word": "Wander", "meaning": "deambular / vagar"},
 
-      { word: "achieve", meaning: "lograr / alcanzar" },
-      { word: "allow", meaning: "permitir" },
-      { word: "arrange", meaning: "organizar / arreglar" },
-      { word: "attend", meaning: "asistir" },
-      { word: "avoid", meaning: "evitar" },
-      { word: "belong", meaning: "pertenecer" },
-      { word: "behave", meaning: "comportarse" },
-      { word: "compare", meaning: "comparar" },
-      { word: "complaint", meaning: "queja" },
-      { word: "confuse", meaning: "confundir" },
-      { word: "consider", meaning: "considerar" },
-      { word: "contain", meaning: "contener" },
-      { word: "convince", meaning: "convencer" },
-      { word: "create", meaning: "crear" },
-      { word: "damage", meaning: "dañar / daño" },
-      { word: "delay", meaning: "retrasar / retraso" },
-      { word: "depend", meaning: "depender" },
-      { word: "develop", meaning: "desarrollar" },
-      { word: "discover", meaning: "descubrir" },
-      { word: "doubt", meaning: "dudar / duda" },
-      { word: "earn", meaning: "ganar (dinero, respeto)" },
-      { word: "encourage", meaning: "animar / alentar" },
-      { word: "enjoyable", meaning: "agradable / divertido" },
-      { word: "expect", meaning: "esperar (algo probable)" },
-      { word: "explain", meaning: "explicar" },
-      { word: "fail", meaning: "fallar / fracasar" },
-      { word: "gather", meaning: "reunir / recoger" },
-      { word: "improve", meaning: "mejorar" },
-      { word: "increase", meaning: "aumentar" },
-      { word: "involve", meaning: "involucrar" },
-      { word: "mention", meaning: "mencionar" },
-      { word: "noticeable", meaning: "notable / que se nota" },
-      { word: "prefer", meaning: "preferir" },
-      { word: "provide", meaning: "proporcionar" },
-      { word: "realize", meaning: "darse cuenta" },
-      { word: "recognize", meaning: "reconocer" },
-      { word: "reduce", meaning: "reducir" },
-      { word: "remind", meaning: "recordar (hacer recordar)" },
-      { word: "suggest", meaning: "sugerir" },
-      { word: "wonder", meaning: "preguntarse / maravillarse" }
+      {"word": "Ill", "meaning": "enfermo / mal"},
+      {"word": "Newcomers", "meaning": "recién llegados"},
+      {"word": "Loud", "meaning": "ruidoso"},
+      {"word": "Gather", "meaning": "reunir / recoger"},
+      {"word": "Clay", "meaning": "arcilla"},
+      {"word": "Pit", "meaning": "pozo / fosa"},
+      {"word": "Envelope", "meaning": "sobre (de carta)"},
+      {"word": "Gunpowder", "meaning": "pólvora"},
+      {"word": "Toss", "meaning": "lanzar / arrojar"},
+      {"word": "Cheers", "meaning": "salud / brindis"},
+      {"word": "Beverage", "meaning": "bebida"},
+      {"word": "Truly", "meaning": "realmente"},
+      {"word": "Proves", "meaning": "demuestra / prueba"},
+      {"word": "Mishaps", "meaning": "contratiempos"},
+      {"word": "Land", "meaning": "tierra / aterrizar"},
+      {"word": "Treasure", "meaning": "tesoro"},
+      {"word": "Candler", "meaning": "candelero"},
+      {"word": "Shifted", "meaning": "cambió / movió"},
+      {"word": "Clever", "meaning": "listo / ingenioso"},
+      {"word": "Contour", "meaning": "contorno"},
+      {"word": "Remains", "meaning": "restos / permanece"}
     ];
 
-    // =======================
-    //   2) ESTADO DEL JUEGO
-    // =======================
-    let currentIndex = 0;
-    let correct = 0;
-    let incorrect = 0;
-    let questions = [];
+    // ====== UTILIDADES ======
+    const $ = (q) => document.querySelector(q);
+    const $$ = (q) => Array.from(document.querySelectorAll(q));
+    const rand = (n) => Math.floor(Math.random()*n);
+    const shuffle = (arr) => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 
-    // =======================
-    //   3) UTILIDADES
-    // =======================
-    const $ = (sel) => document.querySelector(sel);
+    // ====== HEURÍSTICAS DE SIMILITUD PARA DISTRCTORES ======
+    const normalize = (s) => (s||'').toString().trim().toLowerCase()
+      .replace(/\s+/g,' ')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
-    function shuffle(arr){
-      for(let i=arr.length-1; i>0; i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+    const charSet = (s) => new Set(normalize(s).replace(/[^a-záéíóúüñ ]/gi,''));
+    const jaccard = (a, b) => {
+      const A = charSet(a), B = charSet(b);
+      const inter = new Set([...A].filter(x=>B.has(x))).size;
+      const uni = new Set([...A, ...B]).size || 1;
+      return inter / uni;
+    };
+
+    function scoreSimilarity(a, b){
+      if (!a || !b) return 0;
+      const na = normalize(a), nb = normalize(b);
+      const sameFirst = na[0] === nb[0] ? 0.15 : 0;
+      const lenDiff = Math.abs(na.length - nb.length);
+      const lenScore = Math.max(0, 0.25 - (lenDiff*0.04)); // cae con longitud diferente
+      const jac = jaccard(a, b); // 0..1
+      return sameFirst + lenScore + jac * 0.7; // peso fuerte a superposición
+    }
+
+    // ====== ESTADO DEL QUIZ (ORDEN ALEATORIO SIN REPETIR) ======
+    let order = [];
+    let pointer = 0;
+
+    function makeOrder(){
+      order = shuffle([...Array(vocabulario.length).keys()]);
+      pointer = 0;
+    }
+
+    function getCurrentIndex(){
+      if (pointer >= order.length) makeOrder();
+      return order[pointer];
+    }
+
+    function goNext(){
+      pointer++;
+      if (pointer >= order.length) makeOrder();
+    }
+
+    function goPrev(){
+      pointer = (pointer - 1 + order.length) % order.length;
+    }
+
+    function jumpRandomRemaining(){
+      // Saltar a otro índice dentro del mismo ciclo sin repetir
+      if (order.length <= 1) return;
+      const remaining = order.slice(pointer+1);
+      if (remaining.length === 0) { makeOrder(); return; }
+      const pick = remaining[rand(remaining.length)];
+      // Recolocar el elegido justo en la posición actual (swap) para visitar ya
+      const pos = order.indexOf(pick);
+      [order[pointer], order[pos]] = [order[pos], order[pointer]];
+    }
+
+    // Estado de pregunta
+    let idx = 0;
+    let current = null;
+
+    // Elementos
+    const modeSel = $('#mode');
+    const qTypeSel = $('#questionType');
+    const promptEl = $('#prompt');
+    const hintEl = $('#hint');
+    const answerEl = $('#answer');
+    const checkBtn = $('#btnCheck');
+    const showBtn = $('#btnShow');
+    const prevBtn = $('#btnPrev');
+    const nextBtn = $('#btnNext');
+    const rndBtn = $('#btnRandom');
+    const statusEl = $('#status');
+    const counterEl = $('#counter');
+    const mcBlock = $('#mcBlock');
+    const openBlock = $('#openBlock');
+    const listWrap = $('#listWrap');
+    const toggleListBtn = $('#btnToggleList');
+
+    function updateCounter(){
+      const pos = pointer % order.length;
+      counterEl.textContent = `${pos+1} / ${vocabulario.length}`;
+    }
+
+    function setPrompt() {
+      idx = getCurrentIndex();
+      current = vocabulario[idx];
+      statusEl.textContent = '';
+      statusEl.className = 'status';
+      answerEl.value = '';
+
+      const mode = modeSel.value;
+      if (mode === 'en-es') {
+        promptEl.textContent = current.word;
+        hintEl.textContent = 'Traduce al español';
+      } else if (mode === 'es-en') {
+        promptEl.textContent = current.meaning.replace(/ *\/ */g, ' / ');
+        hintEl.textContent = 'Traduce al inglés';
+      } else {
+        promptEl.textContent = current.word;
+        hintEl.textContent = 'Deletrea la palabra en inglés';
       }
-      return arr;
+
+      renderQuestionType();
+      updateCounter();
+      answerEl.focus();
     }
 
-    function pickOptions(correctMeaning){
-      const pool = vocabulario.map(v=>v.meaning).filter(m=>m!==correctMeaning);
-      shuffle(pool);
-      const opts = [correctMeaning, ...pool.slice(0,3)];
-      return shuffle(opts);
+    function renderList(){
+      const html = vocabulario.map(v =>
+        `<div class="list-item"><span class="left">${v.word}</span><span class="right">${v.meaning}</span></div>`
+      ).join('');
+      listWrap.innerHTML = html;
     }
 
-    function updateHUD(){
-      $("#current-question").textContent = Math.min(currentIndex+1, questions.length);
-      $("#total-questions").textContent = questions.length;
-      $("#correct-score").textContent = correct;
-      $("#incorrect-score").textContent = incorrect;
-      const pct = questions.length ? ( (currentIndex)/questions.length )*100 : 0;
-      $("#progress-bar").style.width = pct + "%";
-    }
-
-    // =======================
-    //   4) RENDER PREGUNTA
-    // =======================
-    function renderQuestion(){
-      if(currentIndex >= questions.length){
-        return endGame();
+    function renderQuestionType(){
+      const type = qTypeSel.value;
+      if (type === 'open') {
+        mcBlock.classList.add('hidden');
+        openBlock.classList.remove('hidden');
+      } else {
+        openBlock.classList.add('hidden');
+        mcBlock.classList.remove('hidden');
+        renderMC();
       }
-      const q = questions[currentIndex];
-      $("#word-display").textContent = q.word;
-      $("#question-text").textContent = "> DECODE THE MEANING OF THIS WORD_";
-      const opts = pickOptions(q.meaning);
-      const cont = $("#options-container");
-      cont.innerHTML = "";
-      opts.forEach(opt=>{
-        const btn = document.createElement("button");
-        btn.className = "option-btn";
-        btn.textContent = opt;
-        btn.onclick = ()=> checkAnswer(btn, opt, q.meaning);
-        cont.appendChild(btn);
-      });
-      $("#result-message").style.display = "none";
-      updateHUD();
     }
 
-    function checkAnswer(btn, selected, correctMeaning){
-      const buttons = Array.from(document.querySelectorAll(".option-btn"));
-      buttons.forEach(b=> b.disabled = true);
-      const result = $("#result-message");
-      if(selected === correctMeaning){
-        correct++;
-        btn.classList.add("correct");
-        result.className = "result-message correct";
-        result.textContent = "✅ Correct!";
-      }else{
-        incorrect++;
-        btn.classList.add("incorrect");
-        const good = buttons.find(b=>b.textContent===correctMeaning);
-        if(good) good.classList.add("correct");
-        result.className = "result-message incorrect";
-        result.textContent = "❌ Incorrect. Correct answer: " + correctMeaning;
+    function getCorrectAnswerText(){
+      const mode = modeSel.value;
+      if (mode === 'en-es') return current.meaning;
+      if (mode === 'es-en' || mode === 'spell') return current.word;
+    }
+
+    function checkAnswer(user){
+      const mode = modeSel.value;
+      const correct = getCorrectAnswerText();
+      const isSpell = (mode === 'spell');
+      const ok = isSpell
+        ? normalize(user) === normalize(correct)
+        : normalize(user) === normalize(correct);
+      setStatus(ok, correct);
+      return ok;
+    }
+
+    function setStatus(ok, correct){
+      if (ok){
+        statusEl.textContent = '✅ ¡Correcto!';
+        statusEl.className = 'status ok';
+      } else {
+        statusEl.textContent = `❌ Incorrecto. Respuesta: ${correct}`;
+        statusEl.className = 'status bad';
       }
-      result.style.display = "block";
-      currentIndex++;
-      setTimeout(renderQuestion, 850);
     }
 
-    function endGame(){
-      $("#options-container").innerHTML = "";
-      $("#word-display").textContent = "SYSTEM IDLE";
-      $("#question-text").textContent = "> TRAINING SESSION ENDED_";
-      $("#result-message").style.display = "none";
-      const total = questions.length || 1;
-      const pct = Math.round((correct/total)*100);
-      $("#final-correct").textContent = correct;
-      $("#final-incorrect").textContent = incorrect;
-      $("#final-percentage").textContent = pct;
-      $("#final-message").textContent = pct >= 80 ? "Elite level. Keep pushing." : "Good job. Train more for mastery.";
-      $("#final-score").style.display = "block";
-      $("#progress-bar").style.width = "100%";
-      $("#current-question").textContent = total;
+    function next(){
+      goNext();
+      setPrompt();
+    }
+    function prev(){
+      goPrev();
+      setPrompt();
+    }
+    function randomQ(){
+      jumpRandomRemaining();
+      setPrompt();
     }
 
-    function restartQuiz(){
-      $("#final-score").style.display = "none";
-      currentIndex = 0; correct = 0; incorrect = 0;
-      questions = shuffle([...vocabulario]); // copia + aleatorio
-      updateHUD();
-      renderQuestion();
-    }
+    // ====== OPCIONES MÁS DIFÍCILES (MÚLTIPLE OPCIÓN) ======
+    function pickDistractors(correctText, mode, k=3){
+      // modo en-es: correctText es "meaning" (ES)
+      // modo es-en/spell: correctText es "word" (EN)
+      const pool = vocabulario
+        .map(v => mode === 'en-es' ? v.meaning : v.word)
+        .filter(txt => normalize(txt) !== normalize(correctText));
 
-    $("#btn-reset").addEventListener("click", restartQuiz);
+      // Ordenamos por similitud DESC
+      const ranked = pool
+        .map(txt => ({ txt, s: scoreSimilarity(correctText, txt) }))
+        .sort((a,b)=> b.s - a.s);
 
-    // =======================
-    //   5) API DE TRADUCCIÓN
-    // =======================
-    // Instancia pública tipo LibreTranslate (para demos). En producción: usa backend propio.
-    const LT_ENDPOINT = "https://lt.vern.cc/translate";
-
-    async function apiTranslate(q, source="en", target="es"){
-      const r = await fetch(LT_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ q, source, target })
-      });
-      if(!r.ok){
-        const t = await r.text().catch(()=> "");
-        throw new Error(`HTTP ${r.status} ${t}`.trim());
+      const selected = [];
+      const used = new Set([normalize(correctText)]);
+      for (const r of ranked){
+        const key = normalize(r.txt);
+        if (used.has(key)) continue;
+        selected.push(r.txt);
+        used.add(key);
+        if (selected.length >= k) break;
       }
-      const data = await r.json();
-      if(!data || typeof data.translatedText !== "string"){
-        throw new Error("Respuesta inválida del servidor");
-      }
-      return data.translatedText;
-    }
-    // Exponer a consola: t("Hola","es","en").then(console.log)
-    window.t = apiTranslate;
 
-    // =======================
-    //   6) BOTÓN: TRADUCIR
-    // =======================
-    $("#btn-translate").addEventListener("click", async () => {
-      try{
-        const current = (questions[currentIndex] || {}).word;
-        const useCurrent = confirm(`¿Traducir la palabra actual?\nActual: "${current || "—"}"\n\nAceptar: usar actual (EN→ES)\nCancelar: escribir texto propio`);
-        let text, source="en", target="es";
-        if(useCurrent && current){
-          text = current;
-        }else{
-          text = prompt("Texto a traducir:");
-          if(!text) return;
-          const dir = confirm("Aceptar: ES→EN\nCancelar: EN→ES");
-          source = dir ? "es" : "en";
-          target = dir ? "en" : "es";
+      // Si faltan, completamos aleatoriamente
+      while (selected.length < k){
+        const r = pool[rand(pool.length)];
+        const key = normalize(r);
+        if (!used.has(key)) {
+          selected.push(r);
+          used.add(key);
         }
-        const out = await apiTranslate(text, source, target);
-        alert(`Traducción (${source}→${target}):\n\n${out}`);
-      }catch(e){
-        alert("Error al traducir: " + (e?.message || e));
       }
+      return selected;
+    }
+
+    function renderMC(){
+      const mode = modeSel.value;
+      const correct = getCorrectAnswerText();
+      const distractors = pickDistractors(correct, mode, 3);
+      const options = shuffle([correct, ...distractors]);
+
+      mcBlock.innerHTML = options.map(opt =>
+        `<button class="mcOpt">${opt}</button>`
+      ).join('');
+
+      $$('.mcOpt').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          checkAnswer(btn.textContent);
+        });
+      });
+    }
+
+    // Eventos
+    const answerElRef = ()=> $('#answer'); // por si se re-renderiza (no ocurre, pero por si acaso)
+    const checkBtnHandler = ()=> checkAnswer(answerElRef().value);
+
+    $('#btnCheck').addEventListener('click', checkBtnHandler);
+    $('#btnShow').addEventListener('click', ()=>{
+      setStatus(false, getCorrectAnswerText());
+    });
+    $('#btnPrev').addEventListener('click', prev);
+    $('#btnNext').addEventListener('click', next);
+    $('#btnRandom').addEventListener('click', randomQ);
+    $('#mode').addEventListener('change', ()=>{
+      // Mantener el mismo elemento actual pero refrescar en nuevo modo
+      setPrompt();
+    });
+    $('#questionType').addEventListener('change', renderQuestionType);
+    $('#btnToggleList').addEventListener('click', ()=>{
+      listWrap.classList.toggle('hidden');
     });
 
-    // =======================
-    //   7) BOTÓN: AGREGAR PALABRA
-    // =======================
-    $("#btn-add").addEventListener("click", async () => {
-      try{
-        const en = prompt("Nueva palabra en INGLÉS (ej: resilient):");
-        if(!en) return;
-        // Traduce con la API (EN→ES)
-        const es = await apiTranslate(en, "en", "es");
-        // Confirmar al usuario
-        const ok = confirm(`Se agregará:\n\nword: "${en}"\nmeaning: "${es}"\n\n¿Confirmar?`);
-        if(!ok) return;
-        // Insertar y refrescar conteo
-        vocabulario.push({ word: en.trim(), meaning: es.trim() });
-        alert("✅ Palabra agregada al banco del quiz.");
-        // Si no hay sesión en curso, reinicia; si hay, actualiza total
-        $("#total-questions").textContent = vocabulario.length;
-        if(questions.length === 0 || currentIndex >= questions.length){
-          restartQuiz();
-        }
-      }catch(e){
-        alert("No se pudo agregar: " + (e?.message || e));
-      }
+    // Atajos de teclado
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter') checkAnswer(answerElRef().value);
+      if (e.key.toLowerCase() === 'n') next();
+      if (e.key.toLowerCase() === 'r') randomQ();
+      if (e.key.toLowerCase() === 'p') prev();
     });
 
-    // =======================
-    //   8) INICIO
-    // =======================
-    restartQuiz();
+    // Init
+    renderList();
+    makeOrder();
+    setPrompt();
   </script>
 </body>
 </html>
