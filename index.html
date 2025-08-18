@@ -247,66 +247,17 @@
     const rand = (n) => Math.floor(Math.random()*n);
     const shuffle = (arr) => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 
-    // ====== HEURÍSTICAS DE SIMILITUD PARA DISTRCTORES ======
-    const normalize = (s) => (s||'').toString().trim().toLowerCase()
-      .replace(/\s+/g,' ')
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-
-    const charSet = (s) => new Set(normalize(s).replace(/[^a-záéíóúüñ ]/gi,''));
-    const jaccard = (a, b) => {
-      const A = charSet(a), B = charSet(b);
-      const inter = new Set([...A].filter(x=>B.has(x))).size;
-      const uni = new Set([...A, ...B]).size || 1;
-      return inter / uni;
-    };
-
-    function scoreSimilarity(a, b){
-      if (!a || !b) return 0;
-      const na = normalize(a), nb = normalize(b);
-      const sameFirst = na[0] === nb[0] ? 0.15 : 0;
-      const lenDiff = Math.abs(na.length - nb.length);
-      const lenScore = Math.max(0, 0.25 - (lenDiff*0.04)); // cae con longitud diferente
-      const jac = jaccard(a, b); // 0..1
-      return sameFirst + lenScore + jac * 0.7; // peso fuerte a superposición
-    }
-
-    // ====== ESTADO DEL QUIZ (ORDEN ALEATORIO SIN REPETIR) ======
+    // ====== NUEVO: RECORRIDO ALEATORIO SIN REPETIR ======
     let order = [];
     let pointer = 0;
-
     function makeOrder(){
       order = shuffle([...Array(vocabulario.length).keys()]);
       pointer = 0;
     }
 
-    function getCurrentIndex(){
-      if (pointer >= order.length) makeOrder();
-      return order[pointer];
-    }
-
-    function goNext(){
-      pointer++;
-      if (pointer >= order.length) makeOrder();
-    }
-
-    function goPrev(){
-      pointer = (pointer - 1 + order.length) % order.length;
-    }
-
-    function jumpRandomRemaining(){
-      // Saltar a otro índice dentro del mismo ciclo sin repetir
-      if (order.length <= 1) return;
-      const remaining = order.slice(pointer+1);
-      if (remaining.length === 0) { makeOrder(); return; }
-      const pick = remaining[rand(remaining.length)];
-      // Recolocar el elegido justo en la posición actual (swap) para visitar ya
-      const pos = order.indexOf(pick);
-      [order[pointer], order[pos]] = [order[pos], order[pointer]];
-    }
-
-    // Estado de pregunta
-    let idx = 0;
-    let current = null;
+    // Estado
+    let idx = 0; // índice real dentro de vocabulario (derivado de order[pointer])
+    let current = vocabulario[idx];
 
     // Elementos
     const modeSel = $('#mode');
@@ -327,12 +278,11 @@
     const toggleListBtn = $('#btnToggleList');
 
     function updateCounter(){
-      const pos = pointer % order.length;
-      counterEl.textContent = `${pos+1} / ${vocabulario.length}`;
+      counterEl.textContent = `${(pointer % order.length) + 1} / ${vocabulario.length}`;
     }
 
     function setPrompt() {
-      idx = getCurrentIndex();
+      idx = order[pointer];              // ← usar el orden barajado
       current = vocabulario[idx];
       statusEl.textContent = '';
       statusEl.className = 'status';
@@ -380,13 +330,16 @@
       if (mode === 'es-en' || mode === 'spell') return current.word;
     }
 
+    function normalize(s){
+      return (s||'').toString().trim().toLowerCase()
+        .replace(/\s+/g,' ')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    }
+
     function checkAnswer(user){
       const mode = modeSel.value;
       const correct = getCorrectAnswerText();
-      const isSpell = (mode === 'spell');
-      const ok = isSpell
-        ? normalize(user) === normalize(correct)
-        : normalize(user) === normalize(correct);
+      const ok = normalize(user) === normalize(correct);
       setStatus(ok, correct);
       return ok;
     }
@@ -401,59 +354,35 @@
       }
     }
 
+    // ====== NAVEGACIÓN (manteniendo UI original) ======
     function next(){
-      goNext();
+      pointer = (pointer + 1) % order.length;
       setPrompt();
     }
     function prev(){
-      goPrev();
+      pointer = (pointer - 1 + order.length) % order.length;
       setPrompt();
     }
     function randomQ(){
-      jumpRandomRemaining();
+      pointer = rand(order.length);
       setPrompt();
     }
 
-    // ====== OPCIONES MÁS DIFÍCILES (MÚLTIPLE OPCIÓN) ======
-    function pickDistractors(correctText, mode, k=3){
-      // modo en-es: correctText es "meaning" (ES)
-      // modo es-en/spell: correctText es "word" (EN)
-      const pool = vocabulario
-        .map(v => mode === 'en-es' ? v.meaning : v.word)
-        .filter(txt => normalize(txt) !== normalize(correctText));
-
-      // Ordenamos por similitud DESC
-      const ranked = pool
-        .map(txt => ({ txt, s: scoreSimilarity(correctText, txt) }))
-        .sort((a,b)=> b.s - a.s);
-
-      const selected = [];
-      const used = new Set([normalize(correctText)]);
-      for (const r of ranked){
-        const key = normalize(r.txt);
-        if (used.has(key)) continue;
-        selected.push(r.txt);
-        used.add(key);
-        if (selected.length >= k) break;
-      }
-
-      // Si faltan, completamos aleatoriamente
-      while (selected.length < k){
-        const r = pool[rand(pool.length)];
-        const key = normalize(r);
-        if (!used.has(key)) {
-          selected.push(r);
-          used.add(key);
-        }
-      }
-      return selected;
-    }
-
+    // Opciones (idénticas a las que tenías)
     function renderMC(){
       const mode = modeSel.value;
       const correct = getCorrectAnswerText();
-      const distractors = pickDistractors(correct, mode, 3);
-      const options = shuffle([correct, ...distractors]);
+
+      // Opciones: 1 correcta + 3 distractores
+      const others = shuffle(vocabulario.filter(v => v !== current)).slice(0, 8);
+      let candidates = new Set([correct]);
+
+      for (const v of others){
+        const val = (mode === 'en-es') ? v.meaning : v.word;
+        candidates.add(val);
+        if (candidates.size >= 4) break;
+      }
+      const options = shuffle(Array.from(candidates));
 
       mcBlock.innerHTML = options.map(opt =>
         `<button class="mcOpt">${opt}</button>`
@@ -467,28 +396,22 @@
     }
 
     // Eventos
-    const answerElRef = ()=> $('#answer'); // por si se re-renderiza (no ocurre, pero por si acaso)
-    const checkBtnHandler = ()=> checkAnswer(answerElRef().value);
-
-    $('#btnCheck').addEventListener('click', checkBtnHandler);
-    $('#btnShow').addEventListener('click', ()=>{
+    checkBtn.addEventListener('click', ()=> checkAnswer(answerEl.value));
+    showBtn.addEventListener('click', ()=>{
       setStatus(false, getCorrectAnswerText());
     });
-    $('#btnPrev').addEventListener('click', prev);
-    $('#btnNext').addEventListener('click', next);
-    $('#btnRandom').addEventListener('click', randomQ);
-    $('#mode').addEventListener('change', ()=>{
-      // Mantener el mismo elemento actual pero refrescar en nuevo modo
-      setPrompt();
-    });
-    $('#questionType').addEventListener('change', renderQuestionType);
-    $('#btnToggleList').addEventListener('click', ()=>{
+    prevBtn.addEventListener('click', prev);
+    nextBtn.addEventListener('click', next);
+    rndBtn.addEventListener('click', randomQ);
+    modeSel.addEventListener('change', setPrompt);
+    qTypeSel.addEventListener('change', renderQuestionType);
+    toggleListBtn.addEventListener('click', ()=>{
       listWrap.classList.toggle('hidden');
     });
 
     // Atajos de teclado
     document.addEventListener('keydown', (e)=>{
-      if (e.key === 'Enter') checkAnswer(answerElRef().value);
+      if (e.key === 'Enter') checkAnswer(answerEl.value);
       if (e.key.toLowerCase() === 'n') next();
       if (e.key.toLowerCase() === 'r') randomQ();
       if (e.key.toLowerCase() === 'p') prev();
@@ -496,8 +419,8 @@
 
     // Init
     renderList();
-    makeOrder();
-    setPrompt();
+    makeOrder();   // ← baraja el orden una vez
+    setPrompt();   // ← muestra el primero del orden aleatorio
   </script>
 </body>
 </html>
