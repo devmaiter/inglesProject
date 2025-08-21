@@ -55,6 +55,7 @@
     <div class="title">🔥 HACKER VOCABULARY QUIZ <span class="sep">|</span> <span class="small">A2 practice</span></div>
     <div class="sub">Modo estudio y quiz rápido para tu lista personalizada.</div>
 
+    <!-- CONTROLES -->
     <div class="panel">
       <div class="card">
         <div class="row">
@@ -65,19 +66,23 @@
             <option value="spell">SPELL (deletrea en inglés)</option>
           </select>
 
-          <button id="btnToggleType">Cambiar tipo</button>
+          <span class="muted">Tipo de pregunta:</span>
+          <button id="btnToggleType">Tipo: Respuesta abierta</button>
         </div>
       </div>
 
+      <!-- TARJETA DE PREGUNTA -->
       <div class="card">
         <div id="prompt" class="word">—</div>
         <div id="hint" class="hint muted"></div>
 
+        <!-- Respuesta abierta -->
         <div id="openBlock" class="row" style="margin-top:10px;">
           <input id="answer" type="text" placeholder="Escribe tu respuesta aquí…" autocomplete="off"/>
           <button id="btnShow">👀 Ver palabra</button>
         </div>
 
+        <!-- Múltiple opción -->
         <div id="mcBlock" class="grid hidden"></div>
 
         <div id="status" class="status"></div>
@@ -89,6 +94,7 @@
         </div>
       </div>
 
+      <!-- LISTADO -->
       <div class="card">
         <div class="row" style="justify-content:space-between;">
           <div class="muted">Lista completa</div>
@@ -100,6 +106,9 @@
   </div>
 
   <script>
+    // =========================
+    //   LISTA DE VOCABULARIO
+    // =========================
     const vocabulario = [
       {"word": "Pride", "meaning": "orgullo"},
       {"word": "Mine", "meaning": "mío / mina"},
@@ -156,7 +165,6 @@
       {"word": "Swear", "meaning": "jurar / maldecir"},
       {"word": "Slipped", "meaning": "resbaló"},
       {"word": "Wander", "meaning": "deambular / vagar"},
-
       {"word": "Ill", "meaning": "enfermo / mal"},
       {"word": "Newcomers", "meaning": "recién llegados"},
       {"word": "Loud", "meaning": "ruidoso"},
@@ -180,38 +188,68 @@
       {"word": "Remains", "meaning": "restos / permanece"}
     ];
 
+    // ====== UTILIDADES ======
     const $ = (q) => document.querySelector(q);
     const $$ = (q) => Array.from(document.querySelectorAll(q));
     const rand = (n) => Math.floor(Math.random()*n);
     const shuffle = (arr) => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 
-    const normalize = (s) => (s||'').toString().trim().toLowerCase().replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    function stripPunctuation(s){ return s.replace(/[.,;:!?¡¿\"'`()\[\]{}]/g,'').replace(/\s+/g,' ').trim(); }
+    // ====== NORMALIZACIÓN / SINÓNIMOS ======
+    const normalize = (s) => (s||'').toString().trim().toLowerCase()
+      .replace(/\s+/g,' ')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
+    function stripPunctuation(s){
+      return s.replace(/[.,;:!?¡¿"'`()\[\]{}]/g,'').replace(/\s+/g,' ').trim();
+    }
+
+    // Explota sinónimos en significado ES: separadores / , ; y paréntesis
+    function explodeVariants(text){
+      const noParen = text.replace(/\([^)]*\)/g,'');
+      const parts = noParen.split(/\s*[\/;,]\s*/g).map(x=>x.trim()).filter(Boolean);
+      if (!parts.length) parts.push(text.trim());
+      const set = new Set();
+      const out = [];
+      for (const p of parts){
+        const n = normalize(stripPunctuation(p));
+        if (!set.has(n)) { set.add(n); out.push(p); }
+      }
+      return out;
+    }
+
+    // ====== ESTADO DEL QUIZ (ORDEN ALEATORIO SIN REPETIR) ======
     let order = [];
     let pointer = 0;
     function makeOrder(){ order = shuffle([...Array(vocabulario.length).keys()]); pointer = 0; }
     function getCurrentIndex(){ if (pointer >= order.length) makeOrder(); return order[pointer]; }
     function goNext(){ pointer++; if (pointer >= order.length) makeOrder(); }
 
-    let idx = 0; let current = null;
+    // Estado de pregunta
+    let idx = 0;
+    let current = null;
+
+    // Elementos
     const modeSel = $('#mode');
+    const typeBtn = $('#btnToggleType');
     const promptEl = $('#prompt');
     const hintEl = $('#hint');
     const answerEl = $('#answer');
+    const showBtn = $('#btnShow');
     const statusEl = $('#status');
     const counterEl = $('#counter');
     const mcBlock = $('#mcBlock');
     const openBlock = $('#openBlock');
     const listWrap = $('#listWrap');
     const toggleListBtn = $('#btnToggleList');
-    const showBtn = $('#btnShow');
-    const typeBtn = $('#btnToggleType');
 
+    // Estado del tipo de pregunta (open/mc)
     let questionType = 'open';
-    const ADVANCE_DELAY = 800;
+    const ADVANCE_DELAY = 800; // ms
 
-    function updateCounter(){ const pos = pointer % order.length; counterEl.textContent = `${pos+1} / ${vocabulario.length}`; }
+    function updateCounter(){
+      const pos = pointer % order.length;
+      counterEl.textContent = `${pos+1} / ${vocabulario.length}`;
+    }
 
     function setPrompt() {
       idx = getCurrentIndex();
@@ -221,17 +259,166 @@
       answerEl.value = '';
 
       const mode = modeSel.value;
-      if (mode === 'en-es') { promptEl.textContent = current.word; hintEl.textContent = 'Traduce al español'; }
-      else if (mode === 'es-en') { promptEl.textContent = current.meaning.replace(/ *\/ */g, ' / '); hintEl.textContent = 'Traduce al inglés'; }
-      else { promptEl.textContent = current.word; hintEl.textContent = 'Deletrea la palabra en inglés'; }
+      if (mode === 'en-es') {
+        promptEl.textContent = current.word;
+        hintEl.textContent = 'Traduce al español';
+      } else if (mode === 'es-en') {
+        promptEl.textContent = current.meaning.replace(/ *\/ */g, ' / ');
+        hintEl.textContent = 'Traduce al inglés';
+      } else {
+        promptEl.textContent = current.word;
+        hintEl.textContent = 'Deletrea la palabra en inglés';
+      }
 
       renderQuestionType();
       updateCounter();
       answerEl.focus();
     }
 
-    function renderList(){ listWrap.innerHTML = vocabulario.map(v => `<div class="list-item"><span class="left">${v.word}</span><span class="right">${v.meaning}</span></div>`).join(''); }
+    function renderList(){
+      listWrap.innerHTML = vocabulario.map(v =>
+        `<div class="list-item"><span class="left">${v.word}</span><span class="right">${v.meaning}</span></div>`
+      ).join('');
+    }
 
     function renderQuestionType(){
-      if (questionType === 'open') { mcBlock.classList.add('hidden'); openBlock.classList.remove('hidden'); }
-      else { openBlock.classList.add('hidden'); mcBlock.classList.remove('
+      if (questionType === 'open') {
+        mcBlock.classList.add('hidden');
+        openBlock.classList.remove('hidden');
+        typeBtn.textContent = 'Tipo: Respuesta abierta';
+      } else {
+        openBlock.classList.add('hidden');
+        mcBlock.classList.remove('hidden');
+        typeBtn.textContent = 'Tipo: Múltiple opción';
+        renderMC();
+      }
+    }
+
+    function getCorrectAnswerText(){
+      const mode = modeSel.value;
+      if (mode === 'en-es') return current.meaning;
+      if (mode === 'es-en' || mode === 'spell') return current.word;
+    }
+
+    // Comprobación estricta (sin typos)
+    function isCorrect(user){
+      const mode = modeSel.value;
+      const userN = normalize(stripPunctuation(user));
+      if (!userN) return false;
+
+      if (mode === 'en-es'){
+        const variants = explodeVariants(getCorrectAnswerText());
+        return variants.some(v => userN === normalize(stripPunctuation(v)));
+      } else if (mode === 'es-en'){
+        const target = normalize(stripPunctuation(current.word));
+        return userN === target || userN === ('to ' + target); // permitir 'to ' opcional
+      } else { // spell
+        const target = normalize(stripPunctuation(current.word));
+        return userN === target; // deletreo exacto
+      }
+    }
+
+    function setStatus(ok, correct){
+      if (ok){ statusEl.textContent = '✅ ¡Correcto!'; statusEl.className = 'status ok'; }
+      else { statusEl.textContent = `❌ Incorrecto. Respuesta: ${correct}`; statusEl.className = 'status bad'; }
+    }
+
+    function autoAdvance(){ setTimeout(()=>{ goNext(); setPrompt(); }, ADVANCE_DELAY); }
+
+    // ====== OPCIONES (MÚLTIPLE OPCIÓN) ======
+    function scoreSimilarity(a, b){
+      if (!a || !b) return 0;
+      const na = normalize(a), nb = normalize(b);
+      const sameFirst = na[0] === nb[0] ? 0.15 : 0;
+      const lenDiff = Math.abs(na.length - nb.length);
+      const lenScore = Math.max(0, 0.25 - (lenDiff*0.04));
+      const setA = new Set(na);
+      const setB = new Set(nb);
+      const inter = new Set([...setA].filter(x=>setB.has(x))).size;
+      const uni = new Set([...setA, ...setB]).size || 1;
+      const jac = inter/uni;
+      return sameFirst + lenScore + jac * 0.7;
+    }
+
+    function pickDistractors(correctText, mode, k=3){
+      const pool = vocabulario
+        .map(v => mode === 'en-es' ? v.meaning : v.word)
+        .filter(txt => normalize(txt) !== normalize(correctText));
+      const ranked = pool.map(txt => ({ txt, s: scoreSimilarity(correctText, txt) }))
+                         .sort((a,b)=> b.s - a.s);
+      const selected = [];
+      const used = new Set([normalize(correctText)]);
+      for (const r of ranked){
+        const key = normalize(r.txt);
+        if (used.has(key)) continue;
+        selected.push(r.txt);
+        used.add(key);
+        if (selected.length >= k) break;
+      }
+      while (selected.length < k){
+        const r = pool[rand(pool.length)];
+        const key = normalize(r);
+        if (!used.has(key)) { selected.push(r); used.add(key); }
+      }
+      return selected;
+    }
+
+    function renderMC(){
+      const mode = modeSel.value;
+      const correct = getCorrectAnswerText();
+      const distractors = pickDistractors(correct, mode, 3);
+      const options = shuffle([correct, ...distractors]);
+
+      mcBlock.innerHTML = options.map(opt => `<button class="mcOpt">${opt}</button>`).join('');
+
+      $$('.mcOpt').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const ok = normalize(btn.textContent) === normalize(correct);
+          setStatus(ok, correct);
+          autoAdvance();
+        });
+      });
+    }
+
+    // ====== EVENTOS ======
+    modeSel.addEventListener('change', setPrompt);
+    typeBtn.addEventListener('click', ()=>{
+      questionType = (questionType === 'open') ? 'mc' : 'open';
+      renderQuestionType();
+    });
+    toggleListBtn.addEventListener('click', ()=>{ listWrap.classList.toggle('hidden'); });
+
+    // Ver palabra
+    showBtn.addEventListener('click', ()=>{
+      setStatus(false, getCorrectAnswerText());
+      autoAdvance();
+    });
+
+    // Input reactivo: evalúa en vivo y avanza cuando es correcto
+    answerEl.addEventListener('input', ()=>{
+      const val = answerEl.value;
+      if (isCorrect(val)){
+        setStatus(true, getCorrectAnswerText());
+        autoAdvance();
+      } else {
+        statusEl.textContent = '';
+        statusEl.className = 'status';
+      }
+    });
+
+    // ENTER: si aún no es correcto, muestra solución y avanza
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter'){
+        const val = answerEl.value;
+        if (!isCorrect(val)){ setStatus(false, getCorrectAnswerText()); }
+        autoAdvance();
+      }
+    });
+
+    // Init
+    renderList();
+    makeOrder();
+    setPrompt();
+  </script>
+</body>
+</html>
