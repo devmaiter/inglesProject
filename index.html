@@ -19,9 +19,9 @@
         radial-gradient(circle at 80% 80%, rgba(0,255,0,.06) 0%, transparent 45%);
       pointer-events:none;
     }
-    .container { width:100%; max-width:950px; background:rgba(0,0,0,.55); border:1px solid #0f7; border-radius:16px; box-shadow:0 0 30px rgba(0,255,140,.15); padding:28px; backdrop-filter: blur(3px); }
-    .title { display:flex; gap:10px; align-items:center; margin-bottom:12px; font-size:26px; letter-spacing:1px; }
-    .sub { color:#7bffbf; font-size:14px; opacity:.9; margin-bottom:18px; }
+    .container { width:100%; max-width:980px; background:rgba(0,0,0,.55); border:1px solid #0f7; border-radius:16px; box-shadow:0 0 30px rgba(0,255,140,.15); padding:28px; backdrop-filter: blur(3px); }
+    .title { display:flex; gap:10px; align-items:center; margin-bottom:8px; font-size:26px; letter-spacing:1px; }
+    .sub { color:#7bffbf; font-size:14px; opacity:.9; margin-bottom:12px; }
     .panel { display:grid; gap:16px; grid-template-columns: 1fr; margin-top:10px; }
     .card { border:1px solid #0f7; border-radius:14px; padding:18px; background: rgba(0,0,0,.35); }
     .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
@@ -48,6 +48,9 @@
     .right { color:#86ffc6 }
     .hint { font-size:13px; color:#8bffd0 }
     .hidden { display:none }
+    .score { margin-left:auto; font-size:14px; color:#a0ffd6; display:flex; gap:10px; align-items:center; }
+    .pill { border:1px solid #0f7; padding:4px 8px; border-radius:999px; background:#072; }
+    .end { text-align:center; padding:20px 8px; }
   </style>
 </head>
 <body>
@@ -55,34 +58,29 @@
     <div class="title">🔥 HACKER VOCABULARY QUIZ <span class="sep">|</span> <span class="small">A2 practice</span></div>
     <div class="sub">Modo estudio y quiz rápido para tu lista personalizada.</div>
 
-    <!-- CONTROLES -->
     <div class="panel">
       <div class="card">
         <div class="row">
           <label class="muted">Modo:</label>
-          <select id="mode">
-            <option value="en-es">EN ➜ ES (traduce al español)</option>
-            <option value="es-en">ES ➜ EN (traduce al inglés)</option>
-            <option value="spell">SPELL (deletrea en inglés)</option>
-          </select>
-
-          <span class="muted">Tipo de pregunta:</span>
-          <button id="btnToggleType">Tipo: Respuesta abierta</button>
+          <button id="btnToggleMode">Cambiar modo</button>
+          <button id="btnToggleType">Cambiar tipo</button>
+          <div class="score">
+            <span class="pill">✅ <span id="good">0</span></span>
+            <span class="pill">❌ <span id="bad">0</span></span>
+            <span class="pill">Pendientes: <span id="left">0</span></span>
+          </div>
         </div>
       </div>
 
-      <!-- TARJETA DE PREGUNTA -->
       <div class="card">
         <div id="prompt" class="word">—</div>
         <div id="hint" class="hint muted"></div>
 
-        <!-- Respuesta abierta -->
         <div id="openBlock" class="row" style="margin-top:10px;">
           <input id="answer" type="text" placeholder="Escribe tu respuesta aquí…" autocomplete="off"/>
           <button id="btnShow">👀 Ver palabra</button>
         </div>
 
-        <!-- Múltiple opción -->
         <div id="mcBlock" class="grid hidden"></div>
 
         <div id="status" class="status"></div>
@@ -91,10 +89,10 @@
           <span class="sep">•</span>
           <span class="muted">Atajos:</span>
           <span class="kbd">Enter</span> mostrar y pasar
+          <button id="btnRestart" class="hidden">Reiniciar</button>
         </div>
       </div>
 
-      <!-- LISTADO -->
       <div class="card">
         <div class="row" style="justify-content:space-between;">
           <div class="muted">Lista completa</div>
@@ -106,9 +104,7 @@
   </div>
 
   <script>
-    // =========================
-    //   LISTA DE VOCABULARIO
-    // =========================
+    // ====== Datos ======
     const vocabulario = [
       {"word": "Pride", "meaning": "orgullo"},
       {"word": "Mine", "meaning": "mío / mina"},
@@ -188,237 +184,220 @@
       {"word": "Remains", "meaning": "restos / permanece"}
     ];
 
-    // ====== UTILIDADES ======
+    // ====== Utils ======
     const $ = (q) => document.querySelector(q);
     const $$ = (q) => Array.from(document.querySelectorAll(q));
     const rand = (n) => Math.floor(Math.random()*n);
     const shuffle = (arr) => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+    const normalize = (s) => (s||'').toString().trim().toLowerCase();
 
-    // ====== NORMALIZACIÓN / SINÓNIMOS ======
-    const normalize = (s) => (s||'').toString().trim().toLowerCase()
-      .replace(/\s+/g,' ')
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    // ====== Estado ======
+    let pool = [];       // índices pendientes (se vacía cuando terminas)
+    let pointer = 0;     // posición dentro de pool
+    let current = null;  // objeto actual
+    let idx = -1;        // índice actual
+    let mode = 'en-es';  // en-es | es-en | spell
+    let questionType = 'open'; // open | mc
+    let good = 0, bad = 0;
 
-    function stripPunctuation(s){
-      return s.replace(/[.,;:!?¡¿"'`()\[\]{}]/g,'').replace(/\s+/g,' ').trim();
-    }
-
-    // Explota sinónimos en significado ES: separadores / , ; y paréntesis
-    function explodeVariants(text){
-      const noParen = text.replace(/\([^)]*\)/g,'');
-      const parts = noParen.split(/\s*[\/;,]\s*/g).map(x=>x.trim()).filter(Boolean);
-      if (!parts.length) parts.push(text.trim());
-      const set = new Set();
-      const out = [];
-      for (const p of parts){
-        const n = normalize(stripPunctuation(p));
-        if (!set.has(n)) { set.add(n); out.push(p); }
-      }
-      return out;
-    }
-
-    // ====== ESTADO DEL QUIZ (ORDEN ALEATORIO SIN REPETIR) ======
-    let order = [];
-    let pointer = 0;
-    function makeOrder(){ order = shuffle([...Array(vocabulario.length).keys()]); pointer = 0; }
-    function getCurrentIndex(){ if (pointer >= order.length) makeOrder(); return order[pointer]; }
-    function goNext(){ pointer++; if (pointer >= order.length) makeOrder(); }
-
-    // Estado de pregunta
-    let idx = 0;
-    let current = null;
-
-    // Elementos
-    const modeSel = $('#mode');
-    const typeBtn = $('#btnToggleType');
+    // ====== Elementos UI ======
     const promptEl = $('#prompt');
     const hintEl = $('#hint');
     const answerEl = $('#answer');
-    const showBtn = $('#btnShow');
     const statusEl = $('#status');
     const counterEl = $('#counter');
     const mcBlock = $('#mcBlock');
     const openBlock = $('#openBlock');
     const listWrap = $('#listWrap');
     const toggleListBtn = $('#btnToggleList');
+    const showBtn = $('#btnShow');
+    const typeBtn = $('#btnToggleType');
+    const modeBtn = $('#btnToggleMode');
+    const goodEl = $('#good');
+    const badEl = $('#bad');
+    const leftEl = $('#left');
+    const restartBtn = $('#btnRestart');
 
-    // Estado del tipo de pregunta (open/mc)
-    let questionType = 'open';
-    const ADVANCE_DELAY = 800; // ms
+    const ADVANCE_DELAY = 700;
 
-    function updateCounter(){
-      const pos = pointer % order.length;
-      counterEl.textContent = `${pos+1} / ${vocabulario.length}`;
+    // ====== Inicialización ======
+    function reset(){
+      pool = shuffle([...Array(vocabulario.length).keys()]);
+      pointer = 0; good = 0; bad = 0;
+      updateBadGoodLeft();
+      setPrompt();
+      restartBtn.classList.add('hidden');
+      openBlock.classList.remove('hidden');
+      mcBlock.classList.add('hidden');
+      questionType = 'open';
+      statusEl.textContent = '';
+      statusEl.className = 'status';
     }
 
-    function setPrompt() {
-      idx = getCurrentIndex();
+    function updateBadGoodLeft(){
+      goodEl.textContent = good;
+      badEl.textContent = bad;
+      leftEl.textContent = pool.length;
+      const pos = pool.length ? (pointer % pool.length) : 0;
+      counterEl.textContent = `${pool.length ? pos+1 : 0} / ${vocabulario.length}`;
+    }
+
+    function getCurrent(){
+      if (!pool.length){ endQuiz(); return null; }
+      idx = pool[pointer];
       current = vocabulario[idx];
+      return current;
+    }
+
+    function setPrompt(){
+      const cur = getCurrent();
+      if (!cur) return;
       statusEl.textContent = '';
       statusEl.className = 'status';
       answerEl.value = '';
 
-      const mode = modeSel.value;
-      if (mode === 'en-es') {
-        promptEl.textContent = current.word;
-        hintEl.textContent = 'Traduce al español';
-      } else if (mode === 'es-en') {
-        promptEl.textContent = current.meaning.replace(/ *\/ */g, ' / ');
-        hintEl.textContent = 'Traduce al inglés';
-      } else {
-        promptEl.textContent = current.word;
-        hintEl.textContent = 'Deletrea la palabra en inglés';
-      }
+      if (mode === 'en-es') { promptEl.textContent = cur.word; hintEl.textContent = 'Traduce al español'; }
+      else if (mode === 'es-en') { promptEl.textContent = cur.meaning.replace(/ *\/ */g, ' / '); hintEl.textContent = 'Traduce al inglés'; }
+      else { promptEl.textContent = cur.word; hintEl.textContent = 'Deletrea la palabra en inglés'; }
 
       renderQuestionType();
-      updateCounter();
+      updateBadGoodLeft();
       answerEl.focus();
-    }
-
-    function renderList(){
-      listWrap.innerHTML = vocabulario.map(v =>
-        `<div class="list-item"><span class="left">${v.word}</span><span class="right">${v.meaning}</span></div>`
-      ).join('');
     }
 
     function renderQuestionType(){
       if (questionType === 'open') {
         mcBlock.classList.add('hidden');
         openBlock.classList.remove('hidden');
-        typeBtn.textContent = 'Tipo: Respuesta abierta';
       } else {
         openBlock.classList.add('hidden');
         mcBlock.classList.remove('hidden');
-        typeBtn.textContent = 'Tipo: Múltiple opción';
         renderMC();
       }
     }
 
+    function renderList(){
+      listWrap.innerHTML = vocabulario.map(v => `<div class="list-item"><span class="left">${v.word}</span><span class="right">${v.meaning}</span></div>`).join('');
+    }
+
+    // ====== Lógica de evaluación (estricta) ======
+    const strip = (s)=> s.replace(/[.,;:!?¡¿"'`()\[\]{}]/g,'').replace(/\s+/g,' ').trim();
+    const norm = (s)=> normalize(strip(s));
+
+    function explodeVariants(text){
+      const noParen = text.replace(/\([^)]*\)/g,'');
+      const parts = noParen.split(/\s*[\/;,]\s*/g).map(x=>x.trim()).filter(Boolean);
+      return parts.length ? parts : [text.trim()];
+    }
+
     function getCorrectAnswerText(){
-      const mode = modeSel.value;
       if (mode === 'en-es') return current.meaning;
       if (mode === 'es-en' || mode === 'spell') return current.word;
     }
 
-    // Comprobación estricta (sin typos)
     function isCorrect(user){
-      const mode = modeSel.value;
-      const userN = normalize(stripPunctuation(user));
+      const userN = norm(user);
       if (!userN) return false;
-
       if (mode === 'en-es'){
-        const variants = explodeVariants(getCorrectAnswerText());
-        return variants.some(v => userN === normalize(stripPunctuation(v)));
+        const vars = explodeVariants(getCorrectAnswerText());
+        return vars.some(v => userN === norm(v));
       } else if (mode === 'es-en'){
-        const target = normalize(stripPunctuation(current.word));
-        return userN === target || userN === ('to ' + target); // permitir 'to ' opcional
+        const target = norm(current.word);
+        return userN === target || userN === ('to '+target);
       } else { // spell
-        const target = normalize(stripPunctuation(current.word));
-        return userN === target; // deletreo exacto
+        const target = norm(current.word);
+        return userN === target;
       }
     }
 
-    function setStatus(ok, correct){
-      if (ok){ statusEl.textContent = '✅ ¡Correcto!'; statusEl.className = 'status ok'; }
-      else { statusEl.textContent = `❌ Incorrecto. Respuesta: ${correct}`; statusEl.className = 'status bad'; }
-    }
-
-    function autoAdvance(){ setTimeout(()=>{ goNext(); setPrompt(); }, ADVANCE_DELAY); }
-
-    // ====== OPCIONES (MÚLTIPLE OPCIÓN) ======
-    function scoreSimilarity(a, b){
-      if (!a || !b) return 0;
-      const na = normalize(a), nb = normalize(b);
-      const sameFirst = na[0] === nb[0] ? 0.15 : 0;
-      const lenDiff = Math.abs(na.length - nb.length);
-      const lenScore = Math.max(0, 0.25 - (lenDiff*0.04));
-      const setA = new Set(na);
-      const setB = new Set(nb);
-      const inter = new Set([...setA].filter(x=>setB.has(x))).size;
-      const uni = new Set([...setA, ...setB]).size || 1;
-      const jac = inter/uni;
-      return sameFirst + lenScore + jac * 0.7;
-    }
-
-    function pickDistractors(correctText, mode, k=3){
-      const pool = vocabulario
-        .map(v => mode === 'en-es' ? v.meaning : v.word)
-        .filter(txt => normalize(txt) !== normalize(correctText));
-      const ranked = pool.map(txt => ({ txt, s: scoreSimilarity(correctText, txt) }))
-                         .sort((a,b)=> b.s - a.s);
-      const selected = [];
-      const used = new Set([normalize(correctText)]);
-      for (const r of ranked){
-        const key = normalize(r.txt);
-        if (used.has(key)) continue;
-        selected.push(r.txt);
-        used.add(key);
-        if (selected.length >= k) break;
+    // ====== Avance con repetición de fallos ======
+    function advance(correct){
+      if (!pool.length) return endQuiz();
+      if (correct){
+        good++;
+        // eliminar definitivamente el índice actual
+        pool.splice(pointer,1);
+        if (pointer >= pool.length) pointer = 0;
+      } else {
+        bad++;
+        // mover el actual al final para que se repita
+        const [cur] = pool.splice(pointer,1);
+        pool.push(cur);
+        if (pointer >= pool.length) pointer = 0;
       }
-      while (selected.length < k){
-        const r = pool[rand(pool.length)];
-        const key = normalize(r);
-        if (!used.has(key)) { selected.push(r); used.add(key); }
-      }
-      return selected;
+      updateBadGoodLeft();
+      if (!pool.length) return endQuiz();
+      setTimeout(setPrompt, ADVANCE_DELAY);
     }
 
+    function endQuiz(){
+      // Pantalla final con resumen
+      promptEl.innerHTML = '🎉 ¡Terminaste el quiz!';
+      hintEl.innerHTML = `Correctas: <b>${good}</b> &nbsp; • &nbsp; Incorrectas: <b>${bad}</b>`;
+      statusEl.textContent = '';
+      openBlock.classList.add('hidden');
+      mcBlock.classList.add('hidden');
+      restartBtn.classList.remove('hidden');
+    }
+
+    // ====== Múltiple opción ======
     function renderMC(){
-      const mode = modeSel.value;
-      const correct = getCorrectAnswerText();
-      const distractors = pickDistractors(correct, mode, 3);
-      const options = shuffle([correct, ...distractors]);
-
-      mcBlock.innerHTML = options.map(opt => `<button class="mcOpt">${opt}</button>`).join('');
-
+      if (!current) return;
+      // 3 distractores + 1 correcta
+      const others = shuffle(vocabulario.map((v,i)=>({v,i})).filter(x=>x.i!==idx)).slice(0,3).map(x=>x.v);
+      const options = shuffle([current, ...others]);
+      mcBlock.innerHTML = options.map(o=>`<button class="mcOpt">${mode==='en-es'?o.meaning:o.word}</button>`).join('');
       $$('.mcOpt').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const ok = normalize(btn.textContent) === normalize(correct);
-          setStatus(ok, correct);
-          autoAdvance();
-        });
+        btn.onclick = ()=>{
+          const val = btn.textContent;
+          const isOk = (mode==='en-es') ? (norm(val)===norm(current.meaning)) : (norm(val)===norm(current.word));
+          setStatus(isOk);
+          advance(isOk);
+        };
       });
     }
 
-    // ====== EVENTOS ======
-    modeSel.addEventListener('change', setPrompt);
-    typeBtn.addEventListener('click', ()=>{
-      questionType = (questionType === 'open') ? 'mc' : 'open';
-      renderQuestionType();
-    });
-    toggleListBtn.addEventListener('click', ()=>{ listWrap.classList.toggle('hidden'); });
+    function setStatus(ok){
+      if (ok){ statusEl.textContent = '✅ ¡Correcto!'; statusEl.className = 'status ok'; }
+      else { statusEl.textContent = `❌ Incorrecto. Respuesta: ${getCorrectAnswerText()}`; statusEl.className = 'status bad'; }
+    }
 
-    // Ver palabra
-    showBtn.addEventListener('click', ()=>{
-      setStatus(false, getCorrectAnswerText());
-      autoAdvance();
+    // ====== Eventos ======
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter'){
+        // Mostrar respuesta y contar como incorrecta
+        if (pool.length){ setStatus(false); advance(false); }
+      }
     });
 
-    // Input reactivo: evalúa en vivo y avanza cuando es correcto
     answerEl.addEventListener('input', ()=>{
       const val = answerEl.value;
+      if (!pool.length) return;
       if (isCorrect(val)){
-        setStatus(true, getCorrectAnswerText());
-        autoAdvance();
+        setStatus(true);
+        advance(true);
       } else {
         statusEl.textContent = '';
         statusEl.className = 'status';
       }
     });
 
-    // ENTER: si aún no es correcto, muestra solución y avanza
-    document.addEventListener('keydown', (e)=>{
-      if (e.key === 'Enter'){
-        const val = answerEl.value;
-        if (!isCorrect(val)){ setStatus(false, getCorrectAnswerText()); }
-        autoAdvance();
-      }
+    showBtn.addEventListener('click', ()=>{ if (pool.length){ setStatus(false); advance(false); } });
+
+    typeBtn.addEventListener('click', ()=>{ questionType = (questionType==='open')? 'mc':'open'; renderQuestionType(); });
+
+    modeBtn.addEventListener('click', ()=>{
+      mode = (mode==='en-es')? 'es-en' : (mode==='es-en'? 'spell':'en-es');
+      setPrompt();
     });
 
-    // Init
+    toggleListBtn.addEventListener('click', ()=>{ listWrap.classList.toggle('hidden'); });
+
+    restartBtn.addEventListener('click', reset);
+
+    // ====== Start ======
     renderList();
-    makeOrder();
-    setPrompt();
+    reset();
   </script>
 </body>
 </html>
